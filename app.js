@@ -1645,9 +1645,44 @@ function updateAuthHeader() {
   }
 }
 
+let pendingBase64Pfp = null;
+
+function handlePfpFileSelect(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const maxSizeBytes = 1 * 1024 * 1024; // 1 MB strict limit
+  if (file.size > maxSizeBytes) {
+    const sizeMb = (file.size / (1024 * 1024)).toFixed(2);
+    showToast(`⚠️ File size (${sizeMb} MB) exceeds the 1 MB limit! Please choose an image under 1 MB to keep database fast.`, 'error');
+    event.target.value = '';
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    pendingBase64Pfp = e.target.result;
+    
+    // Live update avatar preview inside modal
+    const previewContainer = document.getElementById('modal-avatar-preview');
+    if (previewContainer) {
+      previewContainer.innerHTML = `<img src="${pendingBase64Pfp}" alt="Avatar Preview" style="width:100%; height:100%; object-fit:cover;">`;
+    }
+    const indicator = document.getElementById('file-size-indicator');
+    if (indicator) {
+      const sizeKb = (file.size / 1024).toFixed(0);
+      indicator.style.color = '#10b981';
+      indicator.innerHTML = `✅ Selected: ${file.name} (${sizeKb} KB - Verified under 1 MB)`;
+    }
+    showToast('Image loaded! Click "Save Avatar PFP" to confirm.', 'info');
+  };
+  reader.readAsDataURL(file);
+}
+
 function openUserProfileModal() {
   if (!currentUserAccount) return;
 
+  pendingBase64Pfp = null;
   const displayName = currentUserAccount.name || (currentUserAccount.email ? currentUserAccount.email.split('@')[0] : 'User');
   const firstInitial = displayName.charAt(0).toUpperCase();
   const currentPfp = currentUserAccount.pfpUrl || '';
@@ -1656,17 +1691,27 @@ function openUserProfileModal() {
     'User Profile & Avatar 👤',
     `
       <div style="text-align: center; margin-bottom: 16px;">
-        <div class="user-avatar-badge" style="width: 72px; height: 72px; font-size: 2.2rem; margin: 0 auto 12px auto; box-shadow: 0 4px 16px rgba(220,38,38,0.4);">
+        <div class="user-avatar-badge" id="modal-avatar-preview" style="width: 80px; height: 80px; font-size: 2.4rem; margin: 0 auto 12px auto; box-shadow: 0 4px 16px rgba(220,38,38,0.4);">
           ${currentPfp ? `<img src="${currentPfp}" alt="PFP">` : `<span>${firstInitial}</span>`}
         </div>
         <h3 style="margin-bottom: 4px; font-size: 1.25rem;">${displayName}</h3>
         <p style="color: var(--text-secondary); font-size: 0.85rem;">${currentUserAccount.email || 'Registered Network User'}</p>
       </div>
 
-      <div class="form-group" style="text-align: left; margin-bottom: 14px;">
-        <label style="font-weight: 600;">Custom Profile Picture (PFP Image URL)</label>
-        <input type="url" class="form-control" id="profile-pfp-url" placeholder="https://example.com/avatar.jpg" value="${currentPfp}">
-        <span style="font-size: 0.78rem; color: var(--text-secondary); margin-top: 4px; display: block;">Paste an image URL to update your circular avatar badge instantly.</span>
+      <div class="form-group" style="text-align: left; margin-bottom: 16px; background: var(--gray-50); padding: 14px; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+        <label style="font-weight: 700; display: flex; align-items: center; gap: 6px; margin-bottom: 6px; color: var(--gray-800);">
+          📁 Import Image (File Manager / Google Drive)
+        </label>
+        <p style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 10px;">
+          Upload a PNG or JPG file. Files must be <strong>under 1 MB</strong> to optimize performance.
+        </p>
+        <input type="file" id="profile-pfp-file" accept="image/png, image/jpeg, image/jpg, image/webp" onchange="handlePfpFileSelect(event)" style="display: none;">
+        <button class="btn btn-outline btn-sm glow-card" style="width: 100%; border-color: var(--accent); color: var(--accent); font-weight: 700; padding: 8px 14px;" onclick="document.getElementById('profile-pfp-file').click()">
+          📂 Choose File from Device...
+        </button>
+        <div id="file-size-indicator" style="font-size: 0.78rem; text-align: center; margin-top: 8px; font-weight: 600; color: var(--text-secondary);">
+          ${currentPfp ? 'Custom avatar active.' : 'No file selected.'}
+        </div>
       </div>
     `,
     [
@@ -1674,11 +1719,26 @@ function openUserProfileModal() {
         text: 'Save Avatar PFP',
         class: 'btn-primary',
         action: () => {
-          const newPfp = document.getElementById('profile-pfp-url').value.trim();
-          currentUserAccount.pfpUrl = newPfp;
-          setLoggedInUser(currentUserAccount);
-          closeModal();
-          showToast('Profile picture updated successfully!', 'success');
+          if (pendingBase64Pfp) {
+            currentUserAccount.pfpUrl = pendingBase64Pfp;
+            setLoggedInUser(currentUserAccount);
+
+            // Sync updated PFP avatar to Firebase Firestore
+            if (typeof firebase !== 'undefined' && firebase.apps.length && currentUserAccount.email) {
+              try {
+                firebase.firestore().collection('users_and_donors').where('email', '==', currentUserAccount.email).get().then(snapshot => {
+                  snapshot.forEach(doc => {
+                    doc.ref.update({ pfpUrl: pendingBase64Pfp });
+                  });
+                }).catch(err => console.error('Firestore PFP update error:', err));
+              } catch (e) { }
+            }
+
+            closeModal();
+            showToast('Profile picture avatar updated & saved!', 'success');
+          } else {
+            closeModal();
+          }
         }
       },
       {
