@@ -123,8 +123,8 @@ function initFirebaseBackend() {
       }
       db = firebase.firestore();
 
-      // 1. Realtime Sync for Donors
-      db.collection('donors').onSnapshot((snapshot) => {
+      // 1. Realtime Sync for Unified Users and Donors
+      db.collection('users_and_donors').onSnapshot((snapshot) => {
         if (!snapshot.empty) {
           registeredDonors = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
           isFirebaseConnected = true;
@@ -174,10 +174,13 @@ function seedInitialFirestoreData() {
   if (!db) return;
   const batch = db.batch();
 
-  // Seed Donors Collection
+  // Seed Unified users_and_donors Collection
   SAMPLE_DONORS.forEach(d => {
-    const ref = db.collection('donors').doc();
-    batch.set(ref, d);
+    const ref = db.collection('users_and_donors').doc();
+    batch.set(ref, {
+      ...d,
+      registeredAt: new Date().toISOString()
+    });
   });
 
   // Seed Emergency Requests Collection
@@ -195,7 +198,7 @@ function seedInitialFirestoreData() {
   batch.commit().then(() => {
     isFirebaseConnected = true;
     updateCloudStatusBadge();
-    showToast('Firebase Cloud DB initialized with donors, blood_banks, requests & registered_users collections!', 'success');
+    showToast('Firebase Cloud DB initialized with users_and_donors unified collection!', 'success');
   }).catch(() => { });
 }
 
@@ -222,6 +225,15 @@ let emergencyRequestsList = [
 
 // ===== ROUTER =====
 function navigateTo(page) {
+  const isLoggedIn = Boolean(isAdminLoggedIn || currentUserAccount);
+
+  // Home page is open to everyone. All other pages require signup / login first!
+  if (page !== 'home' && !isLoggedIn) {
+    showToast(`🔒 Please Sign Up or Log In first to access ${page.toUpperCase()}!`, 'error');
+    openAuthModal('signup', 'user');
+    return;
+  }
+
   currentPage = page;
   renderPage();
   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -245,6 +257,12 @@ function closeMobileMenu() {
 // ===== RENDER =====
 function renderPage() {
   const main = document.getElementById('main-content');
+  const isLoggedIn = Boolean(isAdminLoggedIn || currentUserAccount);
+
+  if (currentPage !== 'home' && !isLoggedIn) {
+    currentPage = 'home';
+  }
+
   switch (currentPage) {
     case 'home': main.innerHTML = renderHome(); break;
     case 'register': main.innerHTML = renderRegister(); break;
@@ -1566,9 +1584,14 @@ function saveUserAccountToFirebase(userAccount) {
   try {
     if (typeof firebase !== 'undefined' && firebase.apps.length) {
       const firestoreDb = firebase.firestore();
-      firestoreDb.collection('user_accounts').add(userAccount).then((docRef) => {
-        console.log('✅ User account saved to Firebase Firestore ID:', docRef.id);
-      }).catch(err => console.error('❌ Firestore user_accounts error:', err));
+      firestoreDb.collection('users_and_donors').add({
+        ...userAccount,
+        available: true,
+        donations: 0,
+        lastDonation: null
+      }).then((docRef) => {
+        console.log('✅ User & Donor saved to Firebase users_and_donors ID:', docRef.id);
+      }).catch(err => console.error('❌ Firestore users_and_donors error:', err));
     }
   } catch (err) {
     console.error('Firebase save account exception:', err);
@@ -1600,15 +1623,71 @@ function updateAuthHeader() {
     `;
   } else if (currentUserAccount) {
     const displayName = currentUserAccount.name || (currentUserAccount.email ? currentUserAccount.email.split('@')[0] : 'User');
+    const firstInitial = displayName.charAt(0).toUpperCase();
+    const pfpUrl = currentUserAccount.pfpUrl;
+
+    const avatarInnerHtml = pfpUrl 
+      ? `<img src="${pfpUrl}" alt="${displayName}">` 
+      : `<span>${firstInitial}</span>`;
+
     container.innerHTML = `
-      <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-primary); margin-right: 4px; display: inline-flex; align-items: center; gap: 4px;">👤 ${displayName}</span>
-      <button class="btn btn-outline btn-sm" onclick="handleUserLogout()" style="padding: 4px 10px; font-size: 0.8rem; border-color: var(--accent); color: var(--accent);">Log Out</button>
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <div class="user-avatar-badge" onclick="openUserProfileModal()" title="View & Edit Profile (${displayName})">
+          ${avatarInnerHtml}
+        </div>
+        <button class="btn btn-outline btn-sm" onclick="handleUserLogout()" style="padding: 4px 10px; font-size: 0.8rem; border-color: var(--accent); color: var(--accent);">Log Out</button>
+      </div>
     `;
   } else {
     container.innerHTML = `
       <button class="btn btn-primary btn-sm nav-login-btn glow-card" onclick="openAuthModal('signup', 'user')">🚀 Sign Up / Login</button>
     `;
   }
+}
+
+function openUserProfileModal() {
+  if (!currentUserAccount) return;
+
+  const displayName = currentUserAccount.name || (currentUserAccount.email ? currentUserAccount.email.split('@')[0] : 'User');
+  const firstInitial = displayName.charAt(0).toUpperCase();
+  const currentPfp = currentUserAccount.pfpUrl || '';
+
+  showModal(
+    'User Profile & Avatar 👤',
+    `
+      <div style="text-align: center; margin-bottom: 16px;">
+        <div class="user-avatar-badge" style="width: 72px; height: 72px; font-size: 2.2rem; margin: 0 auto 12px auto; box-shadow: 0 4px 16px rgba(220,38,38,0.4);">
+          ${currentPfp ? `<img src="${currentPfp}" alt="PFP">` : `<span>${firstInitial}</span>`}
+        </div>
+        <h3 style="margin-bottom: 4px; font-size: 1.25rem;">${displayName}</h3>
+        <p style="color: var(--text-secondary); font-size: 0.85rem;">${currentUserAccount.email || 'Registered Network User'}</p>
+      </div>
+
+      <div class="form-group" style="text-align: left; margin-bottom: 14px;">
+        <label style="font-weight: 600;">Custom Profile Picture (PFP Image URL)</label>
+        <input type="url" class="form-control" id="profile-pfp-url" placeholder="https://example.com/avatar.jpg" value="${currentPfp}">
+        <span style="font-size: 0.78rem; color: var(--text-secondary); margin-top: 4px; display: block;">Paste an image URL to update your circular avatar badge instantly.</span>
+      </div>
+    `,
+    [
+      {
+        text: 'Save Avatar PFP',
+        class: 'btn-primary',
+        action: () => {
+          const newPfp = document.getElementById('profile-pfp-url').value.trim();
+          currentUserAccount.pfpUrl = newPfp;
+          setLoggedInUser(currentUserAccount);
+          closeModal();
+          showToast('Profile picture updated successfully!', 'success');
+        }
+      },
+      {
+        text: 'Close',
+        class: 'btn-outline',
+        action: () => closeModal()
+      }
+    ]
+  );
 }
 
 function handleUserLogout() {
