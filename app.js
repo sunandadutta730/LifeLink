@@ -185,32 +185,80 @@ async function clearCollection(collectionName) {
   }
 }
 
-function seedInitialFirestoreData() {
-  if (!db) return;
+let isSeedingProcessActive = false;
 
-  // Seed donors, emergency, blood_banks only (users/logins/admins created on use)
-  const batch = db.batch();
+async function seedInitialFirestoreData() {
+  if (!db || isSeedingProcessActive) return;
+  isSeedingProcessActive = true;
+  console.log('🌱 donors table empty. Starting auto-seed for all 6 tables...');
 
-  SAMPLE_DONORS.forEach(d => {
-    const ref = db.collection('donors').doc();
-    batch.set(ref, { ...d, registeredAt: new Date().toISOString() });
-  });
+  try {
+    const OLD = ['users_and_donors', 'emergency_requests', 'registered_donors',
+                 'all_users', 'login_details', 'admin_details', 'user_logins',
+                 'user_accounts', 'blood_bank_details'];
+    const NEW = ['admins', 'donors', 'emergency', 'users', 'logins', 'blood_banks'];
 
-  emergencyRequestsList.forEach(r => {
-    const ref = db.collection('emergency').doc(r.id);
-    batch.set(ref, r);
-  });
+    // Clear any leftover data from these collections
+    for (const c of [...OLD, ...NEW]) {
+      await clearCollection(c);
+    }
 
-  BLOOD_BANKS.forEach((b, idx) => {
-    const ref = db.collection('blood_banks').doc(`BANK-${idx + 1}`);
-    batch.set(ref, b);
-  });
+    const batch = db.batch();
+    const NOW = new Date().toISOString();
 
-  batch.commit().then(() => {
+    // 1. Seed admins
+    const adminRef = db.collection('admins').doc();
+    batch.set(adminRef, {
+      name: 'LifeLink Admin',
+      email: 'admin@lifelink.org',
+      role: 'admin',
+      savedAt: NOW,
+      note: 'System administrator account'
+    });
+
+    // 2. Seed donors
+    SAMPLE_DONORS.forEach(d => {
+      const ref = db.collection('donors').doc();
+      batch.set(ref, { ...d, registeredAt: NOW });
+    });
+
+    // 3. Seed emergency
+    emergencyRequestsList.forEach(r => {
+      const ref = db.collection('emergency').doc(r.id);
+      batch.set(ref, r);
+    });
+
+    // 4. Seed users (initializer document)
+    const userInitRef = db.collection('users').doc('_init');
+    batch.set(userInitRef, {
+      _placeholder: true,
+      note: 'Master users registry. Created automatically.',
+      createdAt: NOW
+    });
+
+    // 5. Seed logins (initializer document)
+    const loginInitRef = db.collection('logins').doc('_init');
+    batch.set(loginInitRef, {
+      _placeholder: true,
+      note: 'Tracks all login timestamps and sessions.',
+      createdAt: NOW
+    });
+
+    // 6. Seed blood_banks
+    BLOOD_BANKS.forEach((b, idx) => {
+      const ref = db.collection('blood_banks').doc(`BANK-${idx + 1}`);
+      batch.set(ref, b);
+    });
+
+    await batch.commit();
     isFirebaseConnected = true;
     updateCloudStatusBadge();
-    showToast('🌱 Firebase: donors, emergency & blood_banks tables ready!', 'success');
-  }).catch(() => {});
+    showToast('🎉 Created and seeded all 6 tables cleanly in Firebase!', 'success');
+  } catch (err) {
+    console.error('Error auto-seeding Firebase:', err);
+  } finally {
+    isSeedingProcessActive = false;
+  }
 }
 
 // Call window.seedNow() from browser console for a full fresh seed
