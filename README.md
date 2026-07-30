@@ -125,5 +125,10 @@ LifeLink/
 
 ## 📄 License & Credits
 
-Designed & Developed with ❤️ by **Riddhika Ghosh** for the **Hackathon Competition**.  
+Designed & Developed with ❤️ by:
+* **Souham Dutta**
+* **Sunanda Dutta**
+* **Riddhika Ghosh**
+
+Built for the **Hackathon Competition**.  
 Licensed under the [MIT License](LICENSE).
