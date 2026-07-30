@@ -123,8 +123,8 @@ function initFirebaseBackend() {
       }
       db = firebase.firestore();
 
-      // 1. Realtime Sync for Unified Users and Donors
-      db.collection('users_and_donors').onSnapshot((snapshot) => {
+      // 1. Realtime Sync for Registered Donors (Table: registered_donors)
+      db.collection('registered_donors').onSnapshot((snapshot) => {
         if (!snapshot.empty) {
           registeredDonors = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
           isFirebaseConnected = true;
@@ -139,7 +139,7 @@ function initFirebaseBackend() {
         updateCloudStatusBadge();
       });
 
-      // 2. Realtime Sync for Emergency Requests
+      // 2. Realtime Sync for Emergency Requests (Table: emergency_requests)
       db.collection('emergency_requests').onSnapshot((snapshot) => {
         if (!snapshot.empty) {
           emergencyRequestsList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -147,8 +147,8 @@ function initFirebaseBackend() {
         }
       }, () => { });
 
-      // 3. Realtime Sync for Blood Banks Inventory
-      db.collection('blood_banks').onSnapshot((snapshot) => {
+      // 3. Realtime Sync for Blood Bank Details (Table: blood_bank_details)
+      db.collection('blood_bank_details').onSnapshot((snapshot) => {
         if (!snapshot.empty) {
           const cloudBanks = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
           cloudBanks.forEach((cb, idx) => {
@@ -174,31 +174,31 @@ function seedInitialFirestoreData() {
   if (!db) return;
   const batch = db.batch();
 
-  // Seed Unified users_and_donors Collection
+  // Table 2: registered_donors — Sample donor profiles
   SAMPLE_DONORS.forEach(d => {
-    const ref = db.collection('users_and_donors').doc();
+    const ref = db.collection('registered_donors').doc();
     batch.set(ref, {
       ...d,
       registeredAt: new Date().toISOString()
     });
   });
 
-  // Seed Emergency Requests Collection
+  // Table 3: emergency_requests — Active blood requests
   emergencyRequestsList.forEach(r => {
     const ref = db.collection('emergency_requests').doc(r.id);
     batch.set(ref, r);
   });
 
-  // Seed Blood Banks Inventory Collection
+  // Table 6: blood_bank_details — Blood bank inventory
   BLOOD_BANKS.forEach((b, idx) => {
-    const ref = db.collection('blood_banks').doc(`BANK-${idx + 1}`);
+    const ref = db.collection('blood_bank_details').doc(`BANK-${idx + 1}`);
     batch.set(ref, b);
   });
 
   batch.commit().then(() => {
     isFirebaseConnected = true;
     updateCloudStatusBadge();
-    showToast('Firebase Cloud DB initialized with users_and_donors unified collection!', 'success');
+    showToast('Firebase Cloud DB initialized with 6 structured tables!', 'success');
   }).catch(() => { });
 }
 
@@ -1581,34 +1581,54 @@ function setAdminLoggedIn(status) {
 }
 
 function saveUserAccountToFirebase(userAccount) {
-  try {
-    if (typeof firebase !== 'undefined' && firebase.apps.length) {
-      const firestoreDb = firebase.firestore();
-      firestoreDb.collection('users_and_donors').add({
-        ...userAccount,
-        available: true,
-        donations: 0,
-        lastDonation: null
-      }).then((docRef) => {
-        console.log('✅ User & Donor saved to Firebase users_and_donors ID:', docRef.id);
-      }).catch(err => console.error('❌ Firestore users_and_donors error:', err));
-    }
-  } catch (err) {
-    console.error('Firebase save account exception:', err);
+  if (typeof firebase === 'undefined' || !firebase.apps.length) return;
+  const firestoreDb = firebase.firestore();
+  const isAdmin = userAccount.role === 'admin';
+
+  if (isAdmin) {
+    // Table 1: admin_details
+    firestoreDb.collection('admin_details').add({
+      ...userAccount,
+      savedAt: new Date().toISOString()
+    }).then(ref => console.log('✅ Admin saved to admin_details:', ref.id))
+      .catch(err => console.error('❌ admin_details error:', err));
+  } else {
+    // Table 4: all_users — every user who signs up (email or Google)
+    firestoreDb.collection('all_users').add({
+      ...userAccount,
+      savedAt: new Date().toISOString()
+    }).then(ref => console.log('✅ User saved to all_users:', ref.id))
+      .catch(err => console.error('❌ all_users error:', err));
+
+    // Table 2: registered_donors — if they are a donor/user (not admin)
+    firestoreDb.collection('registered_donors').add({
+      ...userAccount,
+      available: true,
+      donations: 0,
+      lastDonation: null,
+      registeredAt: new Date().toISOString()
+    }).then(ref => console.log('✅ Donor saved to registered_donors:', ref.id))
+      .catch(err => console.error('❌ registered_donors error:', err));
   }
 }
 
 function saveUserLoginToFirebase(loginTrack) {
-  try {
-    if (typeof firebase !== 'undefined' && firebase.apps.length) {
-      const firestoreDb = firebase.firestore();
-      firestoreDb.collection('user_logins').add(loginTrack).then((docRef) => {
-        console.log('✅ User login timestamp saved to Firebase Firestore ID:', docRef.id);
-      }).catch(err => console.error('❌ Firestore user_logins error:', err));
-    }
-  } catch (err) {
-    console.error('Firebase save login exception:', err);
+  if (typeof firebase === 'undefined' || !firebase.apps.length) return;
+  const firestoreDb = firebase.firestore();
+
+  if (loginTrack.role === 'admin') {
+    // Table 1: admin_details — also log admin sessions
+    firestoreDb.collection('admin_details').add({
+      ...loginTrack,
+      type: 'admin_login_session'
+    }).then(ref => console.log('✅ Admin login saved to admin_details:', ref.id))
+      .catch(err => console.error('❌ admin_details login error:', err));
   }
+
+  // Table 5: login_details — every login regardless of role
+  firestoreDb.collection('login_details').add(loginTrack)
+    .then(ref => console.log('✅ Login saved to login_details:', ref.id))
+    .catch(err => console.error('❌ login_details error:', err));
 }
 
 // ===== AUTH HEADER & LOGIN / SIGNUP SYSTEM =====
@@ -1723,14 +1743,17 @@ function openUserProfileModal() {
             currentUserAccount.pfpUrl = pendingBase64Pfp;
             setLoggedInUser(currentUserAccount);
 
-            // Sync updated PFP avatar to Firebase Firestore
+            // Sync PFP to Table 4 (all_users) and Table 2 (registered_donors)
             if (typeof firebase !== 'undefined' && firebase.apps.length && currentUserAccount.email) {
               try {
-                firebase.firestore().collection('users_and_donors').where('email', '==', currentUserAccount.email).get().then(snapshot => {
-                  snapshot.forEach(doc => {
-                    doc.ref.update({ pfpUrl: pendingBase64Pfp });
-                  });
-                }).catch(err => console.error('Firestore PFP update error:', err));
+                const db2 = firebase.firestore();
+                const updatePfp = (collectionName) => {
+                  db2.collection(collectionName).where('email', '==', currentUserAccount.email).get().then(snapshot => {
+                    snapshot.forEach(doc => doc.ref.update({ pfpUrl: pendingBase64Pfp }));
+                  }).catch(err => console.error(`PFP update error in ${collectionName}:`, err));
+                };
+                updatePfp('all_users');
+                updatePfp('registered_donors');
               } catch (e) { }
             }
 
@@ -2065,10 +2088,10 @@ function handleAuthLogin(e, role) {
     }
     setLoggedInUser(userAcc);
 
-    // 2. Query Firebase Firestore users_and_donors to fetch profile live
+    // 2. Query Firebase all_users table to fetch profile live on re-login
     if (typeof firebase !== 'undefined' && firebase.apps.length && email) {
       try {
-        firebase.firestore().collection('users_and_donors').where('email', '==', email).get().then(snapshot => {
+        firebase.firestore().collection('all_users').where('email', '==', email).get().then(snapshot => {
           if (!snapshot.empty) {
             const data = snapshot.docs[0].data();
             const restoredAcc = {
@@ -2082,9 +2105,9 @@ function handleAuthLogin(e, role) {
             };
             saveAccountToLocalStore(restoredAcc);
             setLoggedInUser(restoredAcc);
-            console.log('✅ User profile restored from Firebase Firestore:', restoredAcc.name);
+            console.log('✅ User profile restored from all_users:', restoredAcc.name);
           }
-        }).catch(err => console.error('Firestore profile fetch error:', err));
+        }).catch(err => console.error('all_users profile fetch error:', err));
       } catch (e) { }
     }
   }
