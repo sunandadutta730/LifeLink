@@ -211,7 +211,8 @@ function updateCloudStatusBadge() {
 // ===== APP STATE =====
 let currentPage = 'home';
 let registeredDonors = [...SAMPLE_DONORS];
-let isAdminLoggedIn = false;
+let currentUserAccount = JSON.parse(localStorage.getItem('lifelink_user_account') || 'null');
+let isAdminLoggedIn = localStorage.getItem('lifelink_admin_logged_in') === 'true';
 let adminActiveTab = 'donors';
 let emergencyRequestsList = [
   { id: 'REQ-101', patient: 'Rajesh Sharma', blood: 'O+', hospital: 'Lilavati Hospital', city: 'Mumbai', phone: '+91 98200 12345', units: 2, urgency: 'critical', status: 'Pending', createdAt: '2026-07-30 10:30' },
@@ -1542,9 +1543,50 @@ function openAddDonorModal() {
   );
 }
 
-// ===== AUTH HEADER & LOGIN MODAL =====
+// ===== AUTH STATE & PERSISTENCE =====
 let currentAuthMode = 'signup';
-let currentUserAccount = null;
+
+function setLoggedInUser(account) {
+  currentUserAccount = account;
+  if (account) {
+    localStorage.setItem('lifelink_user_account', JSON.stringify(account));
+  } else {
+    localStorage.removeItem('lifelink_user_account');
+  }
+  updateAuthHeader();
+}
+
+function setAdminLoggedIn(status) {
+  isAdminLoggedIn = status;
+  localStorage.setItem('lifelink_admin_logged_in', status ? 'true' : 'false');
+  updateAuthHeader();
+}
+
+function saveUserAccountToFirebase(userAccount) {
+  try {
+    if (typeof firebase !== 'undefined' && firebase.apps.length) {
+      const firestoreDb = firebase.firestore();
+      firestoreDb.collection('user_accounts').add(userAccount).then((docRef) => {
+        console.log('✅ User account saved to Firebase Firestore ID:', docRef.id);
+      }).catch(err => console.error('❌ Firestore user_accounts error:', err));
+    }
+  } catch (err) {
+    console.error('Firebase save account exception:', err);
+  }
+}
+
+function saveUserLoginToFirebase(loginTrack) {
+  try {
+    if (typeof firebase !== 'undefined' && firebase.apps.length) {
+      const firestoreDb = firebase.firestore();
+      firestoreDb.collection('user_logins').add(loginTrack).then((docRef) => {
+        console.log('✅ User login timestamp saved to Firebase Firestore ID:', docRef.id);
+      }).catch(err => console.error('❌ Firestore user_logins error:', err));
+    }
+  } catch (err) {
+    console.error('Firebase save login exception:', err);
+  }
+}
 
 // ===== AUTH HEADER & LOGIN / SIGNUP SYSTEM =====
 function updateAuthHeader() {
@@ -1557,9 +1599,9 @@ function updateAuthHeader() {
       <button class="btn btn-outline btn-sm" onclick="handleUserLogout()" style="padding: 4px 10px; font-size: 0.8rem; border-color: var(--accent); color: var(--accent);">Log Out</button>
     `;
   } else if (currentUserAccount) {
-    const displayName = currentUserAccount.name || currentUserAccount.email.split('@')[0];
+    const displayName = currentUserAccount.name || (currentUserAccount.email ? currentUserAccount.email.split('@')[0] : 'User');
     container.innerHTML = `
-      <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-primary); margin-right: 4px;">👤 ${displayName}</span>
+      <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-primary); margin-right: 4px; display: inline-flex; align-items: center; gap: 4px;">👤 ${displayName}</span>
       <button class="btn btn-outline btn-sm" onclick="handleUserLogout()" style="padding: 4px 10px; font-size: 0.8rem; border-color: var(--accent); color: var(--accent);">Log Out</button>
     `;
   } else {
@@ -1570,9 +1612,8 @@ function updateAuthHeader() {
 }
 
 function handleUserLogout() {
-  isAdminLoggedIn = false;
-  currentUserAccount = null;
-  updateAuthHeader();
+  setAdminLoggedIn(false);
+  setLoggedInUser(null);
   showToast('Logged out successfully.', 'info');
   navigateTo('home');
 }
@@ -1704,9 +1745,7 @@ function handleAuthSignup(e, role) {
   };
 
   // 1. Save Sign Up record to Firebase Firestore collection 'user_accounts'
-  if (isFirebaseConnected && db) {
-    db.collection('user_accounts').add(userAccount).catch(err => console.error('Sign Up Firestore Error:', err));
-  }
+  saveUserAccountToFirebase(userAccount);
 
   // 2. Log login timestamp & activity in Firebase Firestore collection 'user_logins'
   const loginTrack = {
@@ -1719,17 +1758,15 @@ function handleAuthSignup(e, role) {
     deviceInfo: navigator.userAgent
   };
 
-  if (isFirebaseConnected && db) {
-    db.collection('user_logins').add(loginTrack).catch(err => console.error('Login Tracking Error:', err));
-  }
+  saveUserLoginToFirebase(loginTrack);
 
-  currentUserAccount = userAccount;
   if (role === 'admin') {
-    isAdminLoggedIn = true;
+    setAdminLoggedIn(true);
+  } else {
+    setLoggedInUser(userAccount);
   }
 
   closeModal();
-  updateAuthHeader();
 
   showToast(`🎉 Welcome to LifeLink, ${name}! Account created & login logged at ${nowFormatted}.`, 'success');
 
@@ -1753,7 +1790,9 @@ function handleAuthLogin(e, role) {
       showToast('Invalid administrator passcode. Access denied.', 'error');
       return;
     }
-    isAdminLoggedIn = true;
+    setAdminLoggedIn(true);
+  } else {
+    setLoggedInUser({ email, role, name: email.split('@')[0] });
   }
 
   const loginTrack = {
@@ -1766,13 +1805,9 @@ function handleAuthLogin(e, role) {
   };
 
   // Save login timestamp & session activity to Firebase Firestore collection 'user_logins'
-  if (isFirebaseConnected && db) {
-    db.collection('user_logins').add(loginTrack).catch(err => console.error('Login Track Error:', err));
-  }
+  saveUserLoginToFirebase(loginTrack);
 
-  currentUserAccount = { email, role };
   closeModal();
-  updateAuthHeader();
 
   showToast(`🔓 Sign in successful (${role === 'admin' ? 'Administrator' : 'User'})! Login logged at ${nowFormatted}.`, 'success');
 
