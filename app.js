@@ -170,23 +170,37 @@ function initFirebaseBackend() {
   }
 }
 
+// Helper to delete all docs in a collection
+async function clearCollection(collectionName) {
+  if (!db) return;
+  try {
+    const snap = await db.collection(collectionName).get();
+    if (snap.empty) return;
+    const batch = db.batch();
+    snap.docs.forEach(d => batch.delete(d.ref));
+    await batch.commit();
+    console.log(`🗑️  Cleared "${collectionName}" (${snap.size} docs)`);
+  } catch (e) {
+    console.log(`⚠️  Could not clear "${collectionName}": ${e.message}`);
+  }
+}
+
 function seedInitialFirestoreData() {
   if (!db) return;
+
+  // Seed donors, emergency, blood_banks only (users/logins/admins created on use)
   const batch = db.batch();
 
-  // donors — Sample donor profiles
   SAMPLE_DONORS.forEach(d => {
     const ref = db.collection('donors').doc();
     batch.set(ref, { ...d, registeredAt: new Date().toISOString() });
   });
 
-  // emergency — Active blood requests
   emergencyRequestsList.forEach(r => {
     const ref = db.collection('emergency').doc(r.id);
     batch.set(ref, r);
   });
 
-  // blood_banks — Blood bank inventory
   BLOOD_BANKS.forEach((b, idx) => {
     const ref = db.collection('blood_banks').doc(`BANK-${idx + 1}`);
     batch.set(ref, b);
@@ -195,9 +209,70 @@ function seedInitialFirestoreData() {
   batch.commit().then(() => {
     isFirebaseConnected = true;
     updateCloudStatusBadge();
-    showToast('Firebase Cloud DB ready with 6 clean tables!', 'success');
-  }).catch(() => { });
+    showToast('🌱 Firebase: donors, emergency & blood_banks tables ready!', 'success');
+  }).catch(() => {});
 }
+
+// Call window.seedNow() from browser console for a full fresh seed
+window.seedNow = async function() {
+  if (!db) { console.error('Firebase not connected'); return; }
+  console.log('\n🗑️  Deleting all old + new collections...');
+
+  const OLD = ['users_and_donors', 'emergency_requests', 'registered_donors',
+               'all_users', 'login_details', 'admin_details', 'user_logins',
+               'user_accounts', 'blood_bank_details'];
+  const NEW = ['admins', 'donors', 'emergency', 'users', 'logins', 'blood_banks'];
+
+  for (const c of [...OLD, ...NEW]) await clearCollection(c);
+
+  console.log('\n🌱 Seeding 6 fresh tables...');
+  const b = db.batch();
+  const NOW = new Date().toISOString();
+
+  // TABLE 1: admins
+  b.set(db.collection('admins').doc(), {
+    name: 'LifeLink Admin', email: 'admin@lifelink.org',
+    role: 'admin', savedAt: NOW, note: 'System administrator'
+  });
+
+  // TABLE 2: donors
+  SAMPLE_DONORS.forEach(d => {
+    b.set(db.collection('donors').doc(), { ...d, registeredAt: NOW });
+  });
+
+  // TABLE 3: emergency
+  emergencyRequestsList.forEach(r => {
+    b.set(db.collection('emergency').doc(r.id), r);
+  });
+
+  // TABLE 4: users (placeholder)
+  b.set(db.collection('users').doc('_init'), {
+    _placeholder: true, note: 'Populates on first user signup', createdAt: NOW
+  });
+
+  // TABLE 5: logins (placeholder)
+  b.set(db.collection('logins').doc('_init'), {
+    _placeholder: true, note: 'Populates on first login', createdAt: NOW
+  });
+
+  // TABLE 6: blood_banks
+  BLOOD_BANKS.forEach((bk, idx) => {
+    b.set(db.collection('blood_banks').doc(`BANK-${idx + 1}`), bk);
+  });
+
+  await b.commit();
+  console.log('\n✅ All 6 tables created fresh!');
+  console.log('  1. admins        → 1 record');
+  console.log('  2. donors        →', SAMPLE_DONORS.length, 'records');
+  console.log('  3. emergency     →', emergencyRequestsList.length, 'records');
+  console.log('  4. users         → placeholder');
+  console.log('  5. logins        → placeholder');
+  console.log('  6. blood_banks   →', BLOOD_BANKS.length, 'records');
+  showToast('🎉 All 6 Firestore tables seeded fresh!', 'success');
+  isFirebaseConnected = true;
+  updateCloudStatusBadge();
+  renderPage();
+};
 
 function updateCloudStatusBadge() {
   const badge = document.getElementById('cloud-status-badge');
