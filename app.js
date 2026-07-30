@@ -1,16 +1,36 @@
 /* ===== LifeLink – Smart Blood Donor Network ===== */
 /* Application Logic */
 
+// ===== HIGH DETAIL SVG ICON SYSTEM =====
+const SVG_ICONS = {
+  droplet: (size = 20, color = 'currentColor') => `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>`,
+  search: (size = 20, color = 'currentColor') => `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>`,
+  heart: (size = 20, color = 'currentColor') => `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>`,
+  siren: (size = 20, color = 'currentColor') => `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`,
+  hospital: (size = 20, color = 'currentColor') => `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16"/><line x1="9" y1="21" x2="9" y2="9"/><line x1="15" y1="21" x2="15" y2="9"/><line x1="9" y1="9" x2="15" y2="9"/><line x1="12" y1="6" x2="12" y2="12"/><line x1="9" y1="9" x2="15" y2="9"/></svg>`,
+  phone: (size = 20, color = 'currentColor') => `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>`,
+  mapPin: (size = 20, color = 'currentColor') => `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>`,
+  shield: (size = 20, color = 'currentColor') => `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`,
+  users: (size = 20, color = 'currentColor') => `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>`,
+  activity: (size = 20, color = 'currentColor') => `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>`,
+  alertTriangle: (size = 20, color = 'currentColor') => `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`,
+  check: (size = 20, color = 'currentColor') => `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`,
+  cross: (size = 20, color = 'currentColor') => `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`,
+  trash: (size = 20, color = 'currentColor') => `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>`,
+  sparkles: (size = 20, color = 'currentColor') => `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.91 5.8 6.09.2-4.73 3.84 1.63 5.96L12 15.27l-4.9 3.53 1.63-5.96L4 9l6.09-.2L12 3z"/></svg>`,
+  plus: (size = 20, color = 'currentColor') => `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>`
+};
+
 // ===== DATA =====
 const BLOOD_GROUPS = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
 
 const COMPATIBILITY = {
-  'O-':  { donateTo: ['O-', 'O+', 'A-', 'A+', 'B-', 'B+', 'AB-', 'AB+'], receiveFrom: ['O-'], label: 'Universal Donor' },
-  'O+':  { donateTo: ['O+', 'A+', 'B+', 'AB+'], receiveFrom: ['O-', 'O+'], label: 'Most Common' },
-  'A-':  { donateTo: ['A-', 'A+', 'AB-', 'AB+'], receiveFrom: ['O-', 'A-'], label: 'Rare Type' },
-  'A+':  { donateTo: ['A+', 'AB+'], receiveFrom: ['O-', 'O+', 'A-', 'A+'], label: 'Common Type' },
-  'B-':  { donateTo: ['B-', 'B+', 'AB-', 'AB+'], receiveFrom: ['O-', 'B-'], label: 'Rare Type' },
-  'B+':  { donateTo: ['B+', 'AB+'], receiveFrom: ['O-', 'O+', 'B-', 'B+'], label: 'Common Type' },
+  'O-': { donateTo: ['O-', 'O+', 'A-', 'A+', 'B-', 'B+', 'AB-', 'AB+'], receiveFrom: ['O-'], label: 'Universal Donor' },
+  'O+': { donateTo: ['O+', 'A+', 'B+', 'AB+'], receiveFrom: ['O-', 'O+'], label: 'Most Common' },
+  'A-': { donateTo: ['A-', 'A+', 'AB-', 'AB+'], receiveFrom: ['O-', 'A-'], label: 'Rare Type' },
+  'A+': { donateTo: ['A+', 'AB+'], receiveFrom: ['O-', 'O+', 'A-', 'A+'], label: 'Common Type' },
+  'B-': { donateTo: ['B-', 'B+', 'AB-', 'AB+'], receiveFrom: ['O-', 'B-'], label: 'Rare Type' },
+  'B+': { donateTo: ['B+', 'AB+'], receiveFrom: ['O-', 'O+', 'B-', 'B+'], label: 'Common Type' },
   'AB-': { donateTo: ['AB-', 'AB+'], receiveFrom: ['O-', 'A-', 'B-', 'AB-'], label: 'Rarest Type' },
   'AB+': { donateTo: ['AB+'], receiveFrom: ['O-', 'O+', 'A-', 'A+', 'B-', 'B+', 'AB-', 'AB+'], label: 'Universal Receiver' }
 };
@@ -80,9 +100,98 @@ const DASHBOARD_DATA = {
   ]
 };
 
+// ===== FIREBASE CLOUD BACKEND SYSTEM =====
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyBxbuH56XgbtdPlMk7I7UESb8rVOWBlpSU",
+  authDomain: "lifelink-1a1e8.firebaseapp.com",
+  projectId: "lifelink-1a1e8",
+  storageBucket: "lifelink-1a1e8.firebasestorage.app",
+  messagingSenderId: "475258635754",
+  appId: "1:475258635754:web:279e47401fb5ccb5a35e93",
+  measurementId: "G-KLWC63WNHH"
+};
+
+let db = null;
+let isFirebaseConnected = false;
+
+function initFirebaseBackend() {
+  if (typeof firebase !== 'undefined') {
+    try {
+      if (!firebase.apps.length) {
+        firebase.initializeApp(FIREBASE_CONFIG);
+      }
+      db = firebase.firestore();
+
+      // Realtime Sync for Donors
+      db.collection('donors').onSnapshot((snapshot) => {
+        if (!snapshot.empty) {
+          registeredDonors = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          isFirebaseConnected = true;
+          updateCloudStatusBadge();
+          renderPage();
+        } else {
+          seedInitialFirestoreData();
+        }
+      }, (err) => {
+        console.log('Firebase in offline fallback mode:', err.message);
+        isFirebaseConnected = false;
+        updateCloudStatusBadge();
+      });
+
+      // Realtime Sync for Emergency Requests
+      db.collection('emergency_requests').onSnapshot((snapshot) => {
+        if (!snapshot.empty) {
+          emergencyRequestsList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          renderPage();
+        }
+      }, () => { });
+
+    } catch (e) {
+      console.warn('Firebase connection notice:', e.message);
+      isFirebaseConnected = false;
+      updateCloudStatusBadge();
+    }
+  }
+}
+
+function seedInitialFirestoreData() {
+  if (!db) return;
+  const batch = db.batch();
+  SAMPLE_DONORS.forEach(d => {
+    const ref = db.collection('donors').doc();
+    batch.set(ref, d);
+  });
+  emergencyRequestsList.forEach(r => {
+    const ref = db.collection('emergency_requests').doc(r.id);
+    batch.set(ref, r);
+  });
+  batch.commit().then(() => {
+    isFirebaseConnected = true;
+    updateCloudStatusBadge();
+    showToast('Firebase Cloud DB initialized with live sync!', 'success');
+  }).catch(() => { });
+}
+
+function updateCloudStatusBadge() {
+  const badge = document.getElementById('cloud-status-badge');
+  if (badge) {
+    badge.innerHTML = isFirebaseConnected
+      ? `<span style="color:#10b981; display:inline-flex; align-items:center; gap:4px;">${SVG_ICONS.check(14, '#10b981')} Firebase Live Sync</span>`
+      : `<span style="color:#f59e0b; display:inline-flex; align-items:center; gap:4px;">⚡ Local DB Mode</span>`;
+  }
+}
+
 // ===== APP STATE =====
 let currentPage = 'home';
 let registeredDonors = [...SAMPLE_DONORS];
+let isAdminLoggedIn = false;
+let adminActiveTab = 'donors';
+let emergencyRequestsList = [
+  { id: 'REQ-101', patient: 'Rajesh Sharma', blood: 'O+', hospital: 'Lilavati Hospital', city: 'Mumbai', phone: '+91 98200 12345', units: 2, urgency: 'critical', status: 'Pending', createdAt: '2026-07-30 10:30' },
+  { id: 'REQ-102', patient: 'Sunita Patel', blood: 'AB-', hospital: 'Max Super Speciality', city: 'Delhi', phone: '+91 98111 54321', units: 1, urgency: 'critical', status: 'In Progress', createdAt: '2026-07-30 11:15' },
+  { id: 'REQ-103', patient: 'Vikram Malhotra', blood: 'B+', hospital: 'Manipal Hospital', city: 'Bangalore', phone: '+91 98450 99887', units: 3, urgency: 'urgent', status: 'Resolved', createdAt: '2026-07-29 16:45' }
+];
 
 // ===== ROUTER =====
 function navigateTo(page) {
@@ -118,8 +227,10 @@ function renderPage() {
     case 'banks': main.innerHTML = renderBanks(); break;
     case 'awareness': main.innerHTML = renderAwareness(); break;
     case 'dashboard': main.innerHTML = renderDashboard(); break;
+    case 'admin': main.innerHTML = renderAdmin(); break;
     default: main.innerHTML = renderHome();
   }
+  updateAuthHeader();
   initPageEffects();
 }
 
@@ -138,9 +249,9 @@ function renderHome() {
           it's too late.
         </p>
         <div class="lp-hero-ctas">
-          <button class="btn btn-primary btn-lg" onclick="navigateTo('find')">🔍 Find Blood Donor</button>
-          <button class="btn btn-outline btn-lg" onclick="navigateTo('register')">❤️ Register as Donor</button>
-          <button class="btn btn-outline btn-lg lp-emergency-btn" onclick="navigateTo('emergency')">🚨 Emergency Request</button>
+          <button class="btn btn-primary btn-lg glow-card" onclick="navigateTo('find')">${SVG_ICONS.search(18)} Find Blood Donor</button>
+          <button class="btn btn-outline btn-lg glow-card" onclick="navigateTo('register')">${SVG_ICONS.heart(18, '#dc2626')} Register as Donor</button>
+          <button class="btn btn-outline btn-lg lp-emergency-btn pulse-beacon" onclick="navigateTo('emergency')">${SVG_ICONS.siren(18, '#dc2626')} Emergency Request</button>
         </div>
       </div>
 
@@ -293,13 +404,13 @@ function checkDonationEligibility() {
   const lastDate = document.getElementById('reg-last-donation').value;
   const container = document.getElementById('donation-eligibility');
   if (!lastDate) { container.innerHTML = ''; return; }
-  
+
   const last = new Date(lastDate);
   const now = new Date();
   const diffMs = now - last;
   const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
   const threeMonths = 90;
-  
+
   if (diffDays < threeMonths) {
     const daysLeft = threeMonths - diffDays;
     container.innerHTML = `
@@ -324,7 +435,7 @@ function handleRegister(e) {
   const phone = document.getElementById('reg-phone').value;
   const availability = document.getElementById('reg-availability').value;
   const lastDonation = document.getElementById('reg-last-donation').value;
-  
+
   const newDonor = {
     name,
     blood,
@@ -334,11 +445,16 @@ function handleRegister(e) {
     lastDonation: lastDonation || null,
     donations: 0
   };
-  registeredDonors.push(newDonor);
-  
-  showToast(`Welcome ${name}! You've been registered as a ${blood} blood donor in ${city}.`, 'success');
-  
-  // Show modal
+
+  if (isFirebaseConnected && db) {
+    db.collection('donors').add(newDonor).then(() => {
+      showToast(`Welcome ${name}! Registered in Firebase Cloud Database.`, 'success');
+    }).catch(err => console.error('Firestore Register Error:', err));
+  } else {
+    registeredDonors.push(newDonor);
+    showToast(`Welcome ${name}! You've been registered as a ${blood} blood donor in ${city}.`, 'success');
+  }
+
   showModal(
     'Registration Successful! 🎉',
     `Thank you for joining LifeLink, ${name}! As a ${blood} donor in ${city}, you are now part of a network saving lives every day.${RARE_GROUPS.includes(blood) ? ' Your rare blood type is in high demand — you will receive priority emergency alerts.' : ''}`,
@@ -371,7 +487,7 @@ function renderFind() {
             <option value="">All Status</option>
             <option value="available">Available Only</option>
           </select>
-          <button class="btn btn-primary" onclick="filterDonors()">🔍 Search</button>
+          <button class="btn btn-primary" onclick="filterDonors()">${SVG_ICONS.search(16)} Search</button>
         </div>
         <div id="search-summary" class="animate-on-scroll" style="margin-bottom: 20px; font-size: 0.95rem; color: var(--text-secondary);">
           Showing all ${registeredDonors.length} donors
@@ -387,17 +503,18 @@ function renderFind() {
 function renderDonorCards(donors) {
   if (donors.length === 0) {
     return `<div style="text-align: center; padding: 60px 20px; grid-column: 1 / -1;">
-      <div style="font-size: 3rem; margin-bottom: 16px;">😔</div>
+      <div style="margin-bottom: 16px;">${SVG_ICONS.search(48, 'var(--text-muted)')}</div>
       <h3 style="margin-bottom: 8px;">No donors found</h3>
       <p style="color: var(--text-secondary);">Try adjusting your search criteria or check back later.</p>
     </div>`;
   }
-  
-  return donors.map(d => {
+
+  return donors.map((d, index) => {
     const initials = d.name.split(' ').map(n => n[0]).join('');
     const distance = (Math.random() * 15 + 1).toFixed(1);
+    const staggerClass = `stagger-${(index % 4) + 1}`;
     return `
-      <div class="donor-card">
+      <div class="donor-card glow-card reveal-up ${staggerClass}">
         <div class="donor-card-header">
           <div class="donor-avatar">${initials}</div>
           <div>
@@ -406,8 +523,8 @@ function renderDonorCards(donors) {
           </div>
         </div>
         <div class="donor-details">
-          <div class="donor-detail">📍 ${d.city} · ${distance} km away</div>
-          <div class="donor-detail">🩸 ${d.donations || 0} donations</div>
+          <div class="donor-detail" style="display: flex; align-items: center; gap: 6px;">${SVG_ICONS.mapPin(14, 'var(--text-secondary)')} ${d.city} · ${distance} km away</div>
+          <div class="donor-detail" style="display: flex; align-items: center; gap: 6px;">${SVG_ICONS.droplet(14, '#dc2626')} ${d.donations || 0} donations</div>
           <div class="donor-detail">
             <span class="donor-status ${d.available ? 'available' : 'unavailable'}">
               <span class="donor-status-dot"></span>
@@ -417,7 +534,7 @@ function renderDonorCards(donors) {
         </div>
         <button class="btn ${d.available ? 'btn-primary' : 'btn-outline'} btn-sm" style="width: 100%;" 
           onclick="${d.available ? `showToast('Contact request sent to ${d.name}. They will be notified.', 'success')` : `showToast('This donor is currently unavailable.', 'error')`}">
-          ${d.available ? '📞 Contact Donor' : 'Unavailable'}
+          ${d.available ? `${SVG_ICONS.phone(14)} Contact Donor` : 'Unavailable'}
         </button>
       </div>
     `;
@@ -428,14 +545,14 @@ function filterDonors() {
   const blood = document.getElementById('search-blood').value;
   const city = document.getElementById('search-city').value;
   const availability = document.getElementById('search-availability').value;
-  
+
   let filtered = registeredDonors.filter(d => {
     if (blood && d.blood !== blood) return false;
     if (city && d.city !== city) return false;
     if (availability === 'available' && !d.available) return false;
     return true;
   });
-  
+
   document.getElementById('donor-results').innerHTML = renderDonorCards(filtered);
   document.getElementById('search-summary').textContent = `Showing ${filtered.length} of ${registeredDonors.length} donors${blood ? ` with blood group ${blood}` : ''}${city ? ` in ${city}` : ''}`;
 }
@@ -444,13 +561,16 @@ function filterDonors() {
 function renderEmergency() {
   return `
     <div class="page-header" style="background: linear-gradient(180deg, var(--red-50), #fff);">
-      <h1>🚨 Emergency Blood <span class="text-accent">Request</span></h1>
+      <h1 style="display: flex; align-items: center; justify-content: center; gap: 10px;">
+        <span class="pulse-beacon" style="display: inline-flex;">${SVG_ICONS.siren(32, '#dc2626')}</span>
+        Emergency Blood <span class="text-accent">Request</span>
+      </h1>
       <p>Submit an urgent request and we'll instantly notify nearby compatible donors.</p>
     </div>
     <section class="section">
       <div class="container">
-        <div class="form-card animate-on-scroll">
-          <h2>🩸 Urgent Blood Request</h2>
+        <div class="form-card glow-card reveal-up">
+          <h2 style="display: flex; align-items: center; gap: 10px;">${SVG_ICONS.droplet(24, '#dc2626')} Urgent Blood Request</h2>
           <p class="subtitle">Please fill in the details accurately. Nearby donors will be alerted immediately.</p>
           <form id="emergency-form" onsubmit="handleEmergency(event)">
             <div class="form-grid">
@@ -488,23 +608,23 @@ function renderEmergency() {
                 <label>Urgency Level <span class="required">*</span></label>
                 <div class="urgency-selector">
                   <div class="urgency-option" data-level="normal" onclick="selectUrgency('normal')">
-                    <div style="font-size: 1.3rem; margin-bottom: 4px;">🟢</div>
+                    <div style="margin-bottom: 4px;">${SVG_ICONS.check(22, '#10b981')}</div>
                     Normal
                   </div>
                   <div class="urgency-option" data-level="urgent" onclick="selectUrgency('urgent')">
-                    <div style="font-size: 1.3rem; margin-bottom: 4px;">🟡</div>
+                    <div style="margin-bottom: 4px;">${SVG_ICONS.alertTriangle(22, '#f59e0b')}</div>
                     Urgent
                   </div>
                   <div class="urgency-option selected critical" data-level="critical" onclick="selectUrgency('critical')">
-                    <div style="font-size: 1.3rem; margin-bottom: 4px;">🔴</div>
+                    <div style="margin-bottom: 4px;">${SVG_ICONS.siren(22, '#ef4444')}</div>
                     Critical
                   </div>
                 </div>
                 <input type="hidden" id="em-urgency" value="critical">
               </div>
               <div class="form-group full-width" style="margin-top: 12px;">
-                <button type="submit" class="btn btn-primary btn-lg" style="width: 100%; background: linear-gradient(135deg, #dc2626, #991b1b);">
-                  🚨 Submit Emergency Request
+                <button type="submit" class="btn btn-primary btn-lg pulse-beacon" style="width: 100%; background: linear-gradient(135deg, #dc2626, #991b1b);">
+                  ${SVG_ICONS.siren(20)} Submit Emergency Request
                 </button>
               </div>
             </div>
@@ -531,28 +651,50 @@ function handleEmergency(e) {
   const hospital = document.getElementById('em-hospital').value;
   const location = document.getElementById('em-location').value;
   const urgency = document.getElementById('em-urgency').value;
-  
+  const phone = document.getElementById('em-phone').value || '+91 99000 00000';
+  const units = parseInt(document.getElementById('em-units').value) || 1;
+
+  const newReq = {
+    patient,
+    blood,
+    hospital,
+    city: location,
+    phone,
+    units,
+    urgency,
+    status: 'Pending',
+    createdAt: new Date().toISOString().replace('T', ' ').substring(0, 16)
+  };
+
+  if (isFirebaseConnected && db) {
+    db.collection('emergency_requests').add(newReq).then(() => {
+      showToast(`Emergency alert saved to Firebase Cloud DB!`, 'success');
+    }).catch(err => console.error('Firestore Emergency Error:', err));
+  } else {
+    newReq.id = `REQ-${Math.floor(100 + Math.random() * 900)}`;
+    emergencyRequestsList.unshift(newReq);
+    showToast(`Emergency alert sent to compatible donors!`, 'success');
+  }
+
   // Find matching donors
   const matchingDonors = registeredDonors.filter(d => d.blood === blood && d.available);
   const nearbyDonors = matchingDonors.filter(d => d.city === location);
-  
-  showToast(`🚨 Emergency alert sent to ${matchingDonors.length} compatible donors! ${nearbyDonors.length} are in ${location}.`, 'success');
-  
+
   // Simulate notification sequence
   setTimeout(() => {
     showToast(`📱 ${nearbyDonors.length > 0 ? nearbyDonors[0].name : 'A nearby donor'} has been notified of the ${urgency} request.`, 'info');
   }, 2000);
-  
+
   setTimeout(() => {
     showToast(`✅ 3 donors have confirmed availability for ${patient}'s request at ${hospital}.`, 'success');
   }, 4500);
-  
+
   showModal(
     'Emergency Request Submitted 🚨',
     `Your ${urgency} blood request for ${blood} has been submitted.\n\n• Patient: ${patient}\n• Hospital: ${hospital}, ${location}\n• ${matchingDonors.length} compatible donors notified\n• ${nearbyDonors.length} donors near ${location}\n\nDonors will receive push notifications and SMS alerts immediately.`,
     [
-      { text: 'View Donors', class: 'btn-outline', action: () => { closeModal(); navigateTo('find'); document.getElementById('search-blood').value = blood; filterDonors(); } },
-      { text: 'Done', class: 'btn-primary', action: () => closeModal() }
+      { text: 'Track Requests', class: 'btn-outline', action: () => { closeModal(); navigateTo('dashboard'); } },
+      { text: 'Go Home', class: 'btn-primary', action: () => { closeModal(); navigateTo('home'); } }
     ]
   );
 }
@@ -584,11 +726,11 @@ function renderCompatibility() {
 function showCompatibility() {
   const blood = document.getElementById('compat-select').value;
   const container = document.getElementById('compat-results');
-  
+
   if (!blood) { container.innerHTML = ''; return; }
-  
+
   const data = COMPATIBILITY[blood];
-  
+
   container.innerHTML = `
     <div class="compat-result active">
       <div style="text-align: center; margin-bottom: 40px;">
@@ -640,17 +782,17 @@ function renderBanks() {
     <section class="section">
       <div class="container">
         <div class="bank-grid">
-          ${BLOOD_BANKS.map(bank => `
-            <div class="bank-card animate-on-scroll">
-              <div class="bank-name">🏥 ${bank.name}</div>
-              <div class="bank-location">📍 ${bank.location}</div>
+          ${BLOOD_BANKS.map((bank, i) => `
+            <div class="bank-card glow-card reveal-up stagger-${(i % 3) + 1}">
+              <div class="bank-name" style="display: flex; align-items: center; gap: 8px;">${SVG_ICONS.hospital(20, '#dc2626')} ${bank.name}</div>
+              <div class="bank-location" style="display: flex; align-items: center; gap: 6px;">${SVG_ICONS.mapPin(14, 'var(--text-secondary)')} ${bank.location}</div>
               <div class="bank-units">Total Units Available: <strong>${bank.units}</strong></div>
               <div class="bank-bloods">
                 ${Object.entries(bank.bloods).map(([bg, units]) => `
-                  <span class="bank-blood-tag ${units <= 5 ? 'low' : ''}">${bg}: ${units}${units <= 5 ? ' ⚠️' : ''}</span>
+                  <span class="bank-blood-tag ${units <= 5 ? 'low' : ''}">${bg}: ${units}${units <= 5 ? ` ${SVG_ICONS.alertTriangle(12, '#ef4444')}` : ''}</span>
                 `).join('')}
               </div>
-              <div class="bank-contact">📞 ${bank.contact}</div>
+              <div class="bank-contact" style="display: flex; align-items: center; gap: 6px;">${SVG_ICONS.phone(14)} ${bank.contact}</div>
             </div>
           `).join('')}
         </div>
@@ -669,8 +811,8 @@ function renderAwareness() {
     <section class="section">
       <div class="container">
         <div class="awareness-grid">
-          <div class="awareness-card animate-on-scroll">
-            <h3><span style="font-size: 1.3rem;">💪</span> Benefits of Blood Donation</h3>
+          <div class="awareness-card glow-card reveal-up stagger-1">
+            <h3 style="display: flex; align-items: center; gap: 8px;">${SVG_ICONS.sparkles(22, '#dc2626')} Benefits of Blood Donation</h3>
             <ul>
               <li>Saves up to 3 lives with a single donation</li>
               <li>Free health screening before every donation</li>
@@ -680,8 +822,8 @@ function renderAwareness() {
               <li>Gives a sense of purpose and community service</li>
             </ul>
           </div>
-          <div class="awareness-card animate-on-scroll">
-            <h3><span style="font-size: 1.3rem;">✅</span> Who Can Donate Blood</h3>
+          <div class="awareness-card glow-card reveal-up stagger-2">
+            <h3 style="display: flex; align-items: center; gap: 8px;">${SVG_ICONS.check(22, '#10b981')} Who Can Donate Blood</h3>
             <ul>
               <li>Age between 18 to 65 years</li>
               <li>Minimum weight of 50 kg (110 lbs)</li>
@@ -691,8 +833,8 @@ function renderAwareness() {
               <li>In good general health on donation day</li>
             </ul>
           </div>
-          <div class="awareness-card animate-on-scroll">
-            <h3><span style="font-size: 1.3rem;">❌</span> Who Cannot Donate Blood</h3>
+          <div class="awareness-card glow-card reveal-up stagger-3">
+            <h3 style="display: flex; align-items: center; gap: 8px;">${SVG_ICONS.cross(22, '#ef4444')} Who Cannot Donate Blood</h3>
             <ul>
               <li>Individuals with HIV, Hepatitis B/C</li>
               <li>Pregnant or breastfeeding women</li>
@@ -702,8 +844,8 @@ function renderAwareness() {
               <li>Individuals under the influence of alcohol</li>
             </ul>
           </div>
-          <div class="awareness-card animate-on-scroll">
-            <h3><span style="font-size: 1.3rem;">🚫</span> Common Myths Debunked</h3>
+          <div class="awareness-card glow-card reveal-up stagger-4">
+            <h3 style="display: flex; align-items: center; gap: 8px;">${SVG_ICONS.alertTriangle(22, '#f59e0b')} Common Myths Debunked</h3>
             <ul>
               <li><strong>Myth:</strong> Donating blood makes you weak → <em>You recover within 24-48 hours</em></li>
               <li><strong>Myth:</strong> You can get diseases from donating → <em>Sterile, single-use equipment is always used</em></li>
@@ -712,9 +854,9 @@ function renderAwareness() {
               <li><strong>Myth:</strong> Blood donation takes hours → <em>The actual process takes only 8-10 minutes</em></li>
             </ul>
           </div>
-          <div class="awareness-card animate-on-scroll" style="grid-column: 1 / -1;">
-            <h3><span style="font-size: 1.3rem;">🛡️</span> Safety of Blood Donation</h3>
-            <ul style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+          <div class="awareness-card glow-card reveal-up stagger-1">
+            <h3 style="display: flex; align-items: center; gap: 8px;">${SVG_ICONS.shield(22, '#10b981')} Safety of Blood Donation</h3>
+            <ul>
               <li>All equipment is sterile, single-use, and disposable</li>
               <li>Trained medical staff supervise every step</li>
               <li>Pre-donation health check ensures donor safety</li>
@@ -740,14 +882,14 @@ function renderDashboard() {
       <div class="container">
         <div class="dashboard-grid">
           <div>
-            <div class="chart-card animate-on-scroll">
-              <h3>🩸 Blood Groups Most Requested This Month</h3>
+            <div class="chart-card glow-card reveal-left">
+              <h3 style="display: flex; align-items: center; gap: 8px;">${SVG_ICONS.droplet(20, '#dc2626')} Blood Groups Most Requested This Month</h3>
               <div class="bar-chart" id="bar-chart">
                 ${Object.entries(DASHBOARD_DATA.requests).sort((a, b) => b[1] - a[1]).map(([bg, count], i) => {
-                  const maxCount = Math.max(...Object.values(DASHBOARD_DATA.requests));
-                  const width = (count / maxCount) * 100;
-                  const colors = ['red', 'red', 'blue', 'blue', 'green', 'amber', 'amber', 'amber'];
-                  return `
+    const maxCount = Math.max(...Object.values(DASHBOARD_DATA.requests));
+    const width = (count / maxCount) * 100;
+    const colors = ['red', 'red', 'blue', 'blue', 'green', 'amber', 'amber', 'amber'];
+    return `
                     <div class="bar-item">
                       <div class="bar-label">${bg}</div>
                       <div class="bar-track">
@@ -755,16 +897,16 @@ function renderDashboard() {
                       </div>
                     </div>
                   `;
-                }).join('')}
+  }).join('')}
               </div>
             </div>
 
-            <div class="chart-card animate-on-scroll" style="margin-top: 24px;">
-              <h3>⚠️ Rare Blood Shortage Alerts</h3>
+            <div class="chart-card glow-card reveal-left" style="margin-top: 24px;">
+              <h3 style="display: flex; align-items: center; gap: 8px;">${SVG_ICONS.siren(20, '#f59e0b')} Rare Blood Shortage Alerts</h3>
               <div class="alert-list">
                 ${DASHBOARD_DATA.alerts.map(alert => `
                   <div class="alert-item ${alert.type}">
-                    <div class="alert-icon">${alert.type === 'critical' ? '🔴' : '🟡'}</div>
+                    <div class="alert-icon">${SVG_ICONS.siren(18, alert.type === 'critical' ? '#ef4444' : '#f59e0b')}</div>
                     <span>${alert.text}</span>
                   </div>
                 `).join('')}
@@ -773,8 +915,8 @@ function renderDashboard() {
           </div>
 
           <div>
-            <div class="chart-card animate-on-scroll">
-              <h3>📍 Regions with Highest Demand</h3>
+            <div class="chart-card glow-card reveal-right">
+              <h3 style="display: flex; align-items: center; gap: 8px;">${SVG_ICONS.mapPin(20, '#3b82f6')} Regions with Highest Demand</h3>
               <div class="region-list">
                 ${DASHBOARD_DATA.regions.map((r, i) => `
                   <div class="region-item">
@@ -788,8 +930,8 @@ function renderDashboard() {
               </div>
             </div>
 
-            <div class="chart-card animate-on-scroll" style="margin-top: 24px;">
-              <h3>📊 Quick Stats</h3>
+            <div class="chart-card glow-card reveal-right" style="margin-top: 24px;">
+              <h3 style="display: flex; align-items: center; gap: 8px;">${SVG_ICONS.activity(20, '#10b981')} Quick Stats</h3>
               <div style="display: flex; flex-direction: column; gap: 16px; margin-top: 8px;">
                 <div style="padding: 16px; background: var(--red-50); border-radius: var(--radius-md); border-left: 4px solid var(--accent);">
                   <div style="font-family: 'Outfit', sans-serif; font-size: 1.5rem; font-weight: 800; color: var(--accent);">357</div>
@@ -820,7 +962,7 @@ function showToast(message, type = 'info') {
     container.className = 'toast-container';
     document.body.appendChild(container);
   }
-  
+
   const toast = document.createElement('div');
   toast.className = `toast ${type}`;
   toast.innerHTML = `
@@ -829,7 +971,7 @@ function showToast(message, type = 'info') {
     <button class="toast-close" onclick="this.parentElement.remove()">×</button>
   `;
   container.appendChild(toast);
-  
+
   setTimeout(() => {
     toast.style.opacity = '0';
     toast.style.transform = 'translateX(100%)';
@@ -842,7 +984,7 @@ function showToast(message, type = 'info') {
 function showModal(title, message, actions) {
   let overlay = document.querySelector('.modal-overlay');
   if (overlay) overlay.remove();
-  
+
   overlay = document.createElement('div');
   overlay.className = 'modal-overlay';
   overlay.innerHTML = `
@@ -855,18 +997,18 @@ function showModal(title, message, actions) {
     </div>
   `;
   document.body.appendChild(overlay);
-  
+
   // Bind actions
   actions.forEach(a => {
     const btn = document.getElementById(`modal-action-${a.text.replace(/\s/g, '')}`);
     if (btn) btn.addEventListener('click', a.action);
   });
-  
+
   // Click outside to close
   overlay.addEventListener('click', (e) => {
     if (e.target === overlay) closeModal();
   });
-  
+
   // Animate in
   requestAnimationFrame(() => overlay.classList.add('active'));
 }
@@ -885,26 +1027,35 @@ function initPageEffects() {
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
-        entry.target.classList.add('visible');
+        entry.target.classList.add('visible', 'active');
         observer.unobserve(entry.target);
       }
     });
-  }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
-  
-  document.querySelectorAll('.animate-on-scroll').forEach(el => observer.observe(el));
-  
+  }, { threshold: 0.05, rootMargin: '0px 0px 50px 0px' });
+
+  document.querySelectorAll('.animate-on-scroll, .reveal-up, .reveal-scale, .reveal-left, .reveal-right').forEach(el => {
+    observer.observe(el);
+  });
+
+  // Backup safeguard: Immediately make all elements visible
+  requestAnimationFrame(() => {
+    document.querySelectorAll('.animate-on-scroll, .reveal-up, .reveal-scale, .reveal-left, .reveal-right').forEach(el => {
+      el.classList.add('visible', 'active');
+    });
+  });
+
   // Animate stat counters
   document.querySelectorAll('.stat-number[data-count]').forEach(el => {
     const target = parseInt(el.dataset.count);
     animateCounter(el, target);
   });
-  
+
   // Animate dashboard bars
   setTimeout(() => {
     document.querySelectorAll('.bar-fill[data-width]').forEach(el => {
       el.style.width = el.dataset.width + '%';
     });
-  }, 500);
+  }, 300);
 }
 
 function animateCounter(el, target) {
@@ -929,6 +1080,539 @@ function animateCounter(el, target) {
   observer.observe(el);
 }
 
+// ===== ADMIN PORTAL MODULE =====
+function renderAdmin() {
+  if (!isAdminLoggedIn) {
+    setTimeout(() => {
+      navigateTo('home');
+      openLoginModal('admin');
+    }, 50);
+    return `<div style="text-align: center; padding: 100px 20px; font-size: 1.1rem; color: var(--text-secondary);">🔒 Redirecting to Administrator Authentication...</div>`;
+  }
+
+  const totalDonors = registeredDonors.length;
+  const pendingRequests = emergencyRequestsList.filter(r => r.status !== 'Resolved').length;
+  const totalUnits = BLOOD_BANKS.reduce((acc, bank) => acc + bank.units, 0);
+  const activeAlerts = DASHBOARD_DATA.alerts.length;
+
+  return `
+    <div class="page-header" style="padding-bottom: 32px;">
+      <div class="container" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+        <div style="text-align: left;">
+          <h1 style="margin-bottom: 6px;">Admin <span class="text-accent">Control Center</span></h1>
+          <p style="margin: 0;">Manage users, requests, inventory, and system alerts in real time.</p>
+        </div>
+        <button class="btn btn-outline btn-sm" onclick="handleAdminLogout()" style="border-color: var(--accent); color: var(--accent);">
+          🔒 Log Out Admin
+        </button>
+      </div>
+    </div>
+
+    <section class="section" style="padding-top: 32px;">
+      <div class="container">
+        <!-- Summary Cards -->
+        <div class="admin-summary-grid">
+          <div class="admin-stat-card glow-card reveal-up stagger-1">
+            <div class="admin-stat-icon red">${SVG_ICONS.users(22, '#dc2626')}</div>
+            <div>
+              <div class="admin-stat-val">${totalDonors}</div>
+              <div class="admin-stat-label">Registered Donors</div>
+            </div>
+          </div>
+          <div class="admin-stat-card glow-card reveal-up stagger-2">
+            <div class="admin-stat-icon amber">${SVG_ICONS.siren(22, '#d97706')}</div>
+            <div>
+              <div class="admin-stat-val">${pendingRequests}</div>
+              <div class="admin-stat-label">Active Emergency Requests</div>
+            </div>
+          </div>
+          <div class="admin-stat-card glow-card reveal-up stagger-3">
+            <div class="admin-stat-icon blue">${SVG_ICONS.hospital(22, '#3b82f6')}</div>
+            <div>
+              <div class="admin-stat-val">${totalUnits}</div>
+              <div class="admin-stat-label">Total Blood Bank Units</div>
+            </div>
+          </div>
+          <div class="admin-stat-card glow-card reveal-up stagger-4">
+            <div class="admin-stat-icon green">${SVG_ICONS.alertTriangle(22, '#10b981')}</div>
+            <div>
+              <div class="admin-stat-val">${activeAlerts}</div>
+              <div class="admin-stat-label">Shortage Alerts Active</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <div class="admin-header-actions">
+          <div class="admin-tabs">
+            <button class="admin-tab ${adminActiveTab === 'donors' ? 'active' : ''}" onclick="switchAdminTab('donors')">
+              <span style="display:inline-flex; align-items:center; gap:6px;">${SVG_ICONS.users(15)} Donors Database (${totalDonors})</span>
+            </button>
+            <button class="admin-tab ${adminActiveTab === 'requests' ? 'active' : ''}" onclick="switchAdminTab('requests')">
+              <span style="display:inline-flex; align-items:center; gap:6px;">${SVG_ICONS.siren(15)} Emergency Requests (${emergencyRequestsList.length})</span>
+            </button>
+            <button class="admin-tab ${adminActiveTab === 'banks' ? 'active' : ''}" onclick="switchAdminTab('banks')">
+              <span style="display:inline-flex; align-items:center; gap:6px;">${SVG_ICONS.hospital(15)} Blood Banks Inventory</span>
+            </button>
+            <button class="admin-tab ${adminActiveTab === 'alerts' ? 'active' : ''}" onclick="switchAdminTab('alerts')">
+              <span style="display:inline-flex; align-items:center; gap:6px;">${SVG_ICONS.alertTriangle(15)} System Alerts (${activeAlerts})</span>
+            </button>
+          </div>
+          ${adminActiveTab === 'donors' ? `
+            <button class="btn btn-primary btn-sm glow-card" onclick="openAddDonorModal()">${SVG_ICONS.plus(16)} Add New Donor</button>
+          ` : ''}
+        </div>
+
+        <!-- Tab Content -->
+        ${renderAdminTabContent()}
+      </div>
+    </section>
+  `;
+}
+
+function handleAdminLogin(e) {
+  e.preventDefault();
+  const pass = document.getElementById('admin-passcode').value;
+  if (pass === 'admin123' || pass === 'admin') {
+    isAdminLoggedIn = true;
+    showToast('Administrator authentication successful! Welcome back.', 'success');
+    renderPage();
+  } else {
+    showToast('Invalid administrator passcode. Access denied.', 'error');
+  }
+}
+
+function handleAdminLogout() {
+  isAdminLoggedIn = false;
+  showToast('Logged out of Admin Portal.', 'info');
+  renderPage();
+}
+
+function switchAdminTab(tab) {
+  adminActiveTab = tab;
+  renderPage();
+}
+
+function renderAdminTabContent() {
+  switch (adminActiveTab) {
+    case 'donors': return renderAdminDonorsTab();
+    case 'requests': return renderAdminRequestsTab();
+    case 'banks': return renderAdminBanksTab();
+    case 'alerts': return renderAdminAlertsTab();
+    default: return renderAdminDonorsTab();
+  }
+}
+
+// Donors Tab
+function renderAdminDonorsTab() {
+  return `
+    <div class="admin-table-wrapper">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Donor Name</th>
+            <th>Blood Group</th>
+            <th>Location</th>
+            <th>Phone</th>
+            <th>Donations</th>
+            <th>Status</th>
+            <th style="text-align: right;">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${registeredDonors.map((d, index) => `
+            <tr>
+              <td><strong>${d.name}</strong></td>
+              <td><span class="donor-blood">${d.blood}</span></td>
+              <td>📍 ${d.city}</td>
+              <td>${d.phone}</td>
+              <td>🩸 ${d.donations || 0}</td>
+              <td>
+                <span class="status-badge ${d.available ? 'available' : 'unavailable'}">
+                  ${d.available ? 'Available' : 'Unavailable'}
+                </span>
+              </td>
+              <td style="text-align: right; white-space: nowrap;">
+                <button class="admin-action-btn toggle-btn" onclick="adminToggleDonorStatus(${index})">
+                  ${d.available ? '🚫 Mark Unavailable' : '✅ Mark Available'}
+                </button>
+                <button class="admin-action-btn danger" onclick="adminDeleteDonor(${index})">
+                  🗑️ Delete
+                </button>
+              </td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+// Emergency Requests Tab
+function renderAdminRequestsTab() {
+  return `
+    <div class="admin-table-wrapper">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Patient Name</th>
+            <th>Blood Type</th>
+            <th>Hospital & City</th>
+            <th>Contact</th>
+            <th>Urgency</th>
+            <th>Status</th>
+            <th style="text-align: right;">Update Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${emergencyRequestsList.map((req, index) => `
+            <tr>
+              <td><code>${req.id}</code></td>
+              <td><strong>${req.patient}</strong></td>
+              <td><span class="donor-blood">${req.blood}</span> (${req.units} units)</td>
+              <td>🏥 ${req.hospital}, ${req.city}</td>
+              <td>📞 ${req.phone}</td>
+              <td>
+                <span class="status-badge ${req.urgency}">${req.urgency}</span>
+              </td>
+              <td>
+                <span class="status-badge ${req.status === 'Resolved' ? 'available' : req.status === 'In Progress' ? 'urgent' : 'pending'}">
+                  ${req.status}
+                </span>
+              </td>
+              <td style="text-align: right; white-space: nowrap;">
+                <select class="form-control" style="display: inline-block; width: auto; font-size: 0.85rem; padding: 4px 8px; margin-right: 6px;" 
+                  onchange="adminUpdateReqStatus(${index}, this.value)">
+                  <option value="Pending" ${req.status === 'Pending' ? 'selected' : ''}>Pending</option>
+                  <option value="In Progress" ${req.status === 'In Progress' ? 'selected' : ''}>In Progress</option>
+                  <option value="Resolved" ${req.status === 'Resolved' ? 'selected' : ''}>Resolved</option>
+                </select>
+                <button class="admin-action-btn danger" onclick="adminDeleteRequest(${index})">
+                  🗑️ Delete
+                </button>
+              </td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+// Blood Banks Stock Management Tab
+function renderAdminBanksTab() {
+  return `
+    <div class="bank-grid">
+      ${BLOOD_BANKS.map((bank, bankIdx) => `
+        <div class="bank-card" style="border: 1px solid var(--border-color);">
+          <div class="bank-name">🏥 ${bank.name}</div>
+          <div class="bank-location">📍 ${bank.location}</div>
+          <div style="font-weight: 700; margin-bottom: 12px; font-size: 1.1rem; color: var(--accent);">
+            Total Stock: ${bank.units} Units
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 16px;">
+            ${Object.entries(bank.bloods).map(([bg, units]) => `
+              <div style="display: flex; justify-content: space-between; align-items: center; background: var(--gray-50); padding: 8px 12px; border-radius: var(--radius-sm);">
+                <span style="font-weight: 700;">${bg}: <span style="color: ${units <= 5 ? 'var(--accent)' : 'inherit'}">${units}</span></span>
+                <div style="display: flex; gap: 4px;">
+                  <button class="admin-action-btn toggle-btn" style="padding: 2px 10px !important; font-size: 0.9rem !important;" onclick="adminAdjustBankStock(${bankIdx}, '${bg}', -1)">-</button>
+                  <button class="admin-action-btn toggle-btn" style="padding: 2px 10px !important; font-size: 0.9rem !important;" onclick="adminAdjustBankStock(${bankIdx}, '${bg}', 1)">+</button>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+          <div class="bank-contact">📞 ${bank.contact}</div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+// Shortage Alerts Tab
+function renderAdminAlertsTab() {
+  return `
+    <div style="max-width: 700px; margin: 0 auto;">
+      <div class="form-card" style="margin-bottom: 24px;">
+        <h3>📢 Post New Shortage Alert</h3>
+        <p class="subtitle">Broadcast high-priority shortage notifications to all platform dashboards.</p>
+        <form onsubmit="adminPostAlert(event)">
+          <div class="form-group" style="margin-bottom: 12px;">
+            <label>Alert Description</label>
+            <input type="text" class="form-control" id="alert-text" placeholder="e.g. AB- blood critically low in Kolkata region" required>
+          </div>
+          <div class="form-group" style="margin-bottom: 16px;">
+            <label>Severity Level</label>
+            <select class="form-control" id="alert-type" required>
+              <option value="critical">🔴 Critical Shortage</option>
+              <option value="warning">🟡 Warning / Low Stock</option>
+            </select>
+          </div>
+          <button type="submit" class="btn btn-primary">Publish Alert</button>
+        </form>
+      </div>
+
+      <div class="chart-card">
+        <h3>Current Active Shortage Alerts</h3>
+        <div class="alert-list" style="margin-top: 16px;">
+          ${DASHBOARD_DATA.alerts.map((alert, i) => `
+            <div class="alert-item ${alert.type}" style="display: flex; justify-content: space-between; align-items: center;">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <div class="alert-icon">${alert.type === 'critical' ? '🔴' : '🟡'}</div>
+                <span>${alert.text}</span>
+              </div>
+              <button class="admin-action-btn danger" onclick="adminDeleteAlert(${i})">
+                🗑️ Remove
+              </button>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// Admin Action Handlers
+function adminToggleDonorStatus(index) {
+  const donor = registeredDonors[index];
+  if (!donor) return;
+  const newStatus = !donor.available;
+  
+  if (isFirebaseConnected && db && donor.id) {
+    db.collection('donors').doc(donor.id).update({ available: newStatus }).then(() => {
+      showToast(`Updated ${donor.name} to ${newStatus ? 'Available' : 'Unavailable'} in Firebase!`, 'success');
+    }).catch(err => console.error('Firestore Update Error:', err));
+  } else {
+    donor.available = newStatus;
+    showToast(`Updated status for ${donor.name}.`, 'info');
+    renderPage();
+  }
+}
+
+function adminDeleteDonor(index) {
+  const donor = registeredDonors[index];
+  if (!donor) return;
+  if (confirm(`Are you sure you want to remove ${donor.name} from the database?`)) {
+    if (isFirebaseConnected && db && donor.id) {
+      db.collection('donors').doc(donor.id).delete().then(() => {
+        showToast(`Donor ${donor.name} deleted from Firebase DB.`, 'success');
+      }).catch(err => console.error('Firestore Delete Error:', err));
+    } else {
+      registeredDonors.splice(index, 1);
+      showToast(`Donor ${donor.name} deleted successfully.`, 'success');
+      renderPage();
+    }
+  }
+}
+
+function adminUpdateReqStatus(index, newStatus) {
+  const req = emergencyRequestsList[index];
+  if (!req) return;
+  
+  if (isFirebaseConnected && db && req.id) {
+    db.collection('emergency_requests').doc(req.id).update({ status: newStatus }).then(() => {
+      showToast(`Emergency Request marked as ${newStatus} in Firebase!`, 'success');
+    });
+  } else {
+    req.status = newStatus;
+    showToast(`Emergency Request marked as ${newStatus}.`, 'success');
+    renderPage();
+  }
+}
+
+function adminDeleteRequest(index) {
+  const req = emergencyRequestsList[index];
+  if (!req) return;
+  
+  if (confirm(`Are you sure you want to delete emergency request for ${req.patient}?`)) {
+    if (isFirebaseConnected && db && req.id) {
+      db.collection('emergency_requests').doc(req.id).delete().then(() => {
+        showToast(`Emergency request for ${req.patient} deleted from Firebase.`, 'info');
+      });
+    } else {
+      emergencyRequestsList.splice(index, 1);
+      showToast(`Request deleted.`, 'info');
+      renderPage();
+    }
+  }
+}
+
+function adminAdjustBankStock(bankIdx, bloodGroup, delta) {
+  const bank = BLOOD_BANKS[bankIdx];
+  const current = bank.bloods[bloodGroup] || 0;
+  const updated = Math.max(0, current + delta);
+  bank.bloods[bloodGroup] = updated;
+  // Recalculate total bank units
+  bank.units = Object.values(bank.bloods).reduce((sum, u) => sum + u, 0);
+  renderPage();
+}
+
+function adminPostAlert(e) {
+  e.preventDefault();
+  const text = document.getElementById('alert-text').value;
+  const type = document.getElementById('alert-type').value;
+  DASHBOARD_DATA.alerts.unshift({ type, text });
+  showToast('Shortage alert published to platform!', 'success');
+  renderPage();
+}
+
+function adminDeleteAlert(index) {
+  DASHBOARD_DATA.alerts.splice(index, 1);
+  showToast('Shortage alert removed.', 'info');
+  renderPage();
+}
+
+function openAddDonorModal() {
+  showModal(
+    'Add New Donor (Admin Mode) 🩸',
+    `Enter details to add a verified donor directly to the network.`,
+    [
+      {
+        text: 'Cancel',
+        class: 'btn-outline',
+        action: () => closeModal()
+      },
+      {
+        text: 'Save Donor',
+        class: 'btn-primary',
+        action: () => {
+          const name = prompt('Donor Full Name:');
+          if (!name) return;
+          const blood = prompt('Blood Group (A+, A-, B+, B-, AB+, AB-, O+, O-):', 'O+');
+          const city = prompt('City:', 'Mumbai');
+          const phone = prompt('Phone:', '+91 98000 11122');
+          if (name && blood && city) {
+            registeredDonors.unshift({
+              name, blood, city, phone: phone || '+91 99999 99999', available: true, donations: 1, lastDonation: '2026-07-01'
+            });
+            closeModal();
+            showToast(`Donor ${name} added to database!`, 'success');
+            renderPage();
+          }
+        }
+      }
+    ]
+  );
+}
+
+// ===== AUTH HEADER & LOGIN MODAL =====
+function updateAuthHeader() {
+  const container = document.getElementById('header-auth-container');
+  if (!container) return;
+
+  if (isAdminLoggedIn) {
+    container.innerHTML = `
+      <button class="btn btn-primary btn-sm nav-login-btn glow-card" onclick="navigateTo('admin')">${SVG_ICONS.shield(14)} Admin Panel</button>
+      <button class="btn btn-outline btn-sm" onclick="handleAdminLogout()" style="padding: 4px 10px; font-size: 0.8rem; border-color: var(--accent); color: var(--accent);">Log Out</button>
+    `;
+  } else {
+    container.innerHTML = `
+      <button class="btn btn-outline btn-sm nav-login-btn glow-card" onclick="openLoginModal('user')">🔐 Login</button>
+    `;
+  }
+}
+
+function openLoginModal(initialRole = 'user') {
+  const getModalBody = (role) => {
+    if (role === 'admin') {
+      return `
+        <h3 style="margin-bottom: 6px; display: flex; align-items: center; justify-content: center; gap: 8px;">${SVG_ICONS.shield(20, '#dc2626')} Administrator Login</h3>
+        <p style="color: var(--text-secondary); margin-bottom: 16px; font-size: 0.88rem;">
+          Enter system passcode to access administrator control center.
+        </p>
+        <div class="login-role-selector">
+          <button class="login-role-btn" onclick="switchLoginRole('user')">${SVG_ICONS.droplet(14, '#dc2626')} Donor / User</button>
+          <button class="login-role-btn active" onclick="switchLoginRole('admin')">${SVG_ICONS.shield(14, '#dc2626')} Administrator</button>
+        </div>
+        <form onsubmit="handleModalAdminLogin(event)">
+          <div class="form-group" style="text-align: left; margin-bottom: 16px;">
+            <label>Admin Passcode</label>
+            <input type="password" class="form-control" id="modal-admin-passcode" placeholder="Enter passcode" required autofocus>
+          </div>
+          <button type="submit" class="btn btn-primary btn-lg" style="width: 100%;">
+            ${SVG_ICONS.shield(16)} Login as Administrator
+          </button>
+        </form>
+      `;
+    } else {
+      return `
+        <h3 style="margin-bottom: 6px;">User & Donor Login 🩸</h3>
+        <p style="color: var(--text-secondary); margin-bottom: 16px; font-size: 0.88rem;">
+          Sign in to view your donor profile and request history.
+        </p>
+        <div class="login-role-selector">
+          <button class="login-role-btn active" onclick="switchLoginRole('user')">🩸 Donor / User</button>
+          <button class="login-role-btn" onclick="switchLoginRole('admin')">🛡️ Administrator</button>
+        </div>
+        <form onsubmit="handleModalUserLogin(event)">
+          <div class="form-group" style="text-align: left; margin-bottom: 12px;">
+            <label>Email or Phone</label>
+            <input type="text" class="form-control" id="modal-user-id" placeholder="your@email.com" required>
+          </div>
+          <div class="form-group" style="text-align: left; margin-bottom: 16px;">
+            <label>Password</label>
+            <input type="password" class="form-control" id="modal-user-pass" placeholder="••••••••" required>
+          </div>
+          <button type="submit" class="btn btn-primary btn-lg" style="width: 100%;">
+            🔓 Sign In as Donor
+          </button>
+        </form>
+      `;
+    }
+  };
+
+  let overlay = document.querySelector('.modal-overlay');
+  if (overlay) overlay.remove();
+
+  overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+  overlay.innerHTML = `
+    <div class="modal" id="login-modal-box" style="max-width: 440px;">
+      <div id="login-modal-content">
+        ${getModalBody(initialRole)}
+      </div>
+      <div style="margin-top: 16px; text-align: center;">
+        <button class="btn btn-outline btn-sm" onclick="closeModal()">Close</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) closeModal();
+  });
+
+  requestAnimationFrame(() => overlay.classList.add('active'));
+}
+
+function switchLoginRole(role) {
+  const container = document.getElementById('login-modal-content');
+  if (container) {
+    openLoginModal(role);
+  }
+}
+
+function handleModalAdminLogin(e) {
+  e.preventDefault();
+  const pass = document.getElementById('modal-admin-passcode').value;
+  if (pass === 'admin123' || pass === 'admin') {
+    isAdminLoggedIn = true;
+    closeModal();
+    showToast('Administrator login successful! Entering Admin Control Center...', 'success');
+    navigateTo('admin');
+  } else {
+    showToast('Invalid administrator passcode. Access denied.', 'error');
+  }
+}
+
+function handleModalUserLogin(e) {
+  e.preventDefault();
+  const userId = document.getElementById('modal-user-id').value;
+  closeModal();
+  showToast(`Welcome back, ${userId.split('@')[0]}!`, 'success');
+  navigateTo('dashboard');
+}
+
 // ===== HEADER SCROLL =====
 window.addEventListener('scroll', () => {
   const header = document.querySelector('.header');
@@ -947,8 +1631,9 @@ function toggleMobileMenu() {
 
 // ===== INIT =====
 document.addEventListener('DOMContentLoaded', () => {
+  initFirebaseBackend();
   renderPage();
-  
+
   // Setup nav click handlers (delegated since nav is static)
   document.addEventListener('click', (e) => {
     const navLink = e.target.closest('.nav a[data-page]');
@@ -958,3 +1643,5 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 });
+
+
