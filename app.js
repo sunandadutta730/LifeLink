@@ -123,7 +123,7 @@ function initFirebaseBackend() {
       }
       db = firebase.firestore();
 
-      // Realtime Sync for Donors
+      // 1. Realtime Sync for Donors
       db.collection('donors').onSnapshot((snapshot) => {
         if (!snapshot.empty) {
           registeredDonors = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -139,10 +139,25 @@ function initFirebaseBackend() {
         updateCloudStatusBadge();
       });
 
-      // Realtime Sync for Emergency Requests
+      // 2. Realtime Sync for Emergency Requests
       db.collection('emergency_requests').onSnapshot((snapshot) => {
         if (!snapshot.empty) {
           emergencyRequestsList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          renderPage();
+        }
+      }, () => { });
+
+      // 3. Realtime Sync for Blood Banks Inventory
+      db.collection('blood_banks').onSnapshot((snapshot) => {
+        if (!snapshot.empty) {
+          const cloudBanks = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          cloudBanks.forEach((cb, idx) => {
+            if (BLOOD_BANKS[idx]) {
+              BLOOD_BANKS[idx].bloods = cb.bloods || BLOOD_BANKS[idx].bloods;
+              BLOOD_BANKS[idx].units = cb.units || BLOOD_BANKS[idx].units;
+              BLOOD_BANKS[idx].firestoreId = cb.id;
+            }
+          });
           renderPage();
         }
       }, () => { });
@@ -158,18 +173,29 @@ function initFirebaseBackend() {
 function seedInitialFirestoreData() {
   if (!db) return;
   const batch = db.batch();
+
+  // Seed Donors Collection
   SAMPLE_DONORS.forEach(d => {
     const ref = db.collection('donors').doc();
     batch.set(ref, d);
   });
+
+  // Seed Emergency Requests Collection
   emergencyRequestsList.forEach(r => {
     const ref = db.collection('emergency_requests').doc(r.id);
     batch.set(ref, r);
   });
+
+  // Seed Blood Banks Inventory Collection
+  BLOOD_BANKS.forEach((b, idx) => {
+    const ref = db.collection('blood_banks').doc(`BANK-${idx + 1}`);
+    batch.set(ref, b);
+  });
+
   batch.commit().then(() => {
     isFirebaseConnected = true;
     updateCloudStatusBadge();
-    showToast('Firebase Cloud DB initialized with live sync!', 'success');
+    showToast('Firebase Cloud DB initialized with donors, blood_banks, requests & registered_users collections!', 'success');
   }).catch(() => { });
 }
 
@@ -447,6 +473,13 @@ function handleRegister(e) {
   };
 
   if (isFirebaseConnected && db) {
+    // 1. Save user to registered_users collection
+    db.collection('registered_users').add({
+      ...newDonor,
+      registeredAt: new Date().toISOString()
+    }).catch(err => console.error('Firestore User Register Error:', err));
+
+    // 2. Save user to donors collection
     db.collection('donors').add(newDonor).then(() => {
       showToast(`Welcome ${name}! Registered in Firebase Cloud Database.`, 'success');
     }).catch(err => console.error('Firestore Register Error:', err));
@@ -1444,7 +1477,21 @@ function adminAdjustBankStock(bankIdx, bloodGroup, delta) {
   bank.bloods[bloodGroup] = updated;
   // Recalculate total bank units
   bank.units = Object.values(bank.bloods).reduce((sum, u) => sum + u, 0);
-  renderPage();
+
+  if (isFirebaseConnected && db) {
+    const docId = bank.firestoreId || `BANK-${bankIdx + 1}`;
+    db.collection('blood_banks').doc(docId).set({
+      name: bank.name,
+      location: bank.location,
+      contact: bank.contact,
+      bloods: bank.bloods,
+      units: bank.units
+    }, { merge: true }).then(() => {
+      showToast(`Updated ${bank.name} stock level in Firebase DB!`, 'success');
+    }).catch(err => console.error('Firestore Bank Update Error:', err));
+  } else {
+    renderPage();
+  }
 }
 
 function adminPostAlert(e) {
