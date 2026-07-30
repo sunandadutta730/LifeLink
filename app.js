@@ -1543,6 +1543,10 @@ function openAddDonorModal() {
 }
 
 // ===== AUTH HEADER & LOGIN MODAL =====
+let currentAuthMode = 'signup';
+let currentUserAccount = null;
+
+// ===== AUTH HEADER & LOGIN / SIGNUP SYSTEM =====
 function updateAuthHeader() {
   const container = document.getElementById('header-auth-container');
   if (!container) return;
@@ -1550,62 +1554,98 @@ function updateAuthHeader() {
   if (isAdminLoggedIn) {
     container.innerHTML = `
       <button class="btn btn-primary btn-sm nav-login-btn glow-card" onclick="navigateTo('admin')">${SVG_ICONS.shield(14)} Admin Panel</button>
-      <button class="btn btn-outline btn-sm" onclick="handleAdminLogout()" style="padding: 4px 10px; font-size: 0.8rem; border-color: var(--accent); color: var(--accent);">Log Out</button>
+      <button class="btn btn-outline btn-sm" onclick="handleUserLogout()" style="padding: 4px 10px; font-size: 0.8rem; border-color: var(--accent); color: var(--accent);">Log Out</button>
+    `;
+  } else if (currentUserAccount) {
+    const displayName = currentUserAccount.name || currentUserAccount.email.split('@')[0];
+    container.innerHTML = `
+      <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-primary); margin-right: 4px;">👤 ${displayName}</span>
+      <button class="btn btn-outline btn-sm" onclick="handleUserLogout()" style="padding: 4px 10px; font-size: 0.8rem; border-color: var(--accent); color: var(--accent);">Log Out</button>
     `;
   } else {
     container.innerHTML = `
-      <button class="btn btn-outline btn-sm nav-login-btn glow-card" onclick="openLoginModal('user')">🔐 Login</button>
+      <button class="btn btn-primary btn-sm nav-login-btn glow-card" onclick="openAuthModal('signup', 'user')">🚀 Sign Up / Login</button>
     `;
   }
 }
 
-function openLoginModal(initialRole = 'user') {
-  const getModalBody = (role) => {
-    if (role === 'admin') {
-      return `
-        <h3 style="margin-bottom: 6px; display: flex; align-items: center; justify-content: center; gap: 8px;">${SVG_ICONS.shield(20, '#dc2626')} Administrator Login</h3>
-        <p style="color: var(--text-secondary); margin-bottom: 16px; font-size: 0.88rem;">
-          Enter system passcode to access administrator control center.
+function handleUserLogout() {
+  isAdminLoggedIn = false;
+  currentUserAccount = null;
+  updateAuthHeader();
+  showToast('Logged out successfully.', 'info');
+  navigateTo('home');
+}
+
+function openAuthModal(mode = 'signup', role = 'user') {
+  currentAuthMode = mode;
+
+  const getModalBody = (m, r) => {
+    const isSignup = m === 'signup';
+    const isAdmin = r === 'admin';
+
+    return `
+      <div style="text-align: center; margin-bottom: 14px;">
+        <h3 style="margin-bottom: 4px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+          ${isAdmin ? SVG_ICONS.shield(22, '#dc2626') : SVG_ICONS.heart(22, '#dc2626')} 
+          ${isSignup ? (isAdmin ? 'Admin Account Sign Up' : 'Create LifeLink Account') : (isAdmin ? 'Administrator Login' : 'User & Donor Sign In')}
+        </h3>
+        <p style="color: var(--text-secondary); font-size: 0.85rem;">
+          ${isSignup ? 'Fill details to register your profile on the network.' : 'Enter credentials to access your account dashboard.'}
         </p>
-        <div class="login-role-selector">
-          <button class="login-role-btn" onclick="switchLoginRole('user')">${SVG_ICONS.droplet(14, '#dc2626')} Donor / User</button>
-          <button class="login-role-btn active" onclick="switchLoginRole('admin')">${SVG_ICONS.shield(14, '#dc2626')} Administrator</button>
+      </div>
+
+      <!-- Role Selector -->
+      <div class="login-role-selector" style="margin-bottom: 16px;">
+        <button class="login-role-btn ${!isAdmin ? 'active' : ''}" onclick="switchAuthRole('${m}', 'user')">
+          ${SVG_ICONS.droplet(14, !isAdmin ? '#dc2626' : 'currentColor')} Donor / User
+        </button>
+        <button class="login-role-btn ${isAdmin ? 'active' : ''}" onclick="switchAuthRole('${m}', 'admin')">
+          ${SVG_ICONS.shield(14, isAdmin ? '#dc2626' : 'currentColor')} Administrator
+        </button>
+      </div>
+
+      <form onsubmit="${isSignup ? 'handleAuthSignup(event, \'' + r + '\')' : 'handleAuthLogin(event, \'' + r + '\')'}">
+        ${isSignup ? `
+          <div class="form-group" style="text-align: left; margin-bottom: 10px;">
+            <label>Full Name</label>
+            <input type="text" class="form-control" id="auth-name" placeholder="John Doe" required autofocus>
+          </div>
+        ` : ''}
+
+        <div class="form-group" style="text-align: left; margin-bottom: 10px;">
+          <label>Email Address</label>
+          <input type="email" class="form-control" id="auth-email" placeholder="user@example.com" required ${!isSignup ? 'autofocus' : ''}>
         </div>
-        <form onsubmit="handleModalAdminLogin(event)">
-          <div class="form-group" style="text-align: left; margin-bottom: 16px;">
-            <label>Admin Passcode</label>
-            <input type="password" class="form-control" id="modal-admin-passcode" placeholder="Enter passcode" required autofocus>
+
+        ${isSignup ? `
+          <div class="form-group" style="text-align: left; margin-bottom: 10px;">
+            <label>Phone Number</label>
+            <input type="tel" class="form-control" id="auth-phone" placeholder="+91 98765 43210" required>
           </div>
-          <button type="submit" class="btn btn-primary btn-lg" style="width: 100%;">
-            ${SVG_ICONS.shield(16)} Login as Administrator
-          </button>
-        </form>
-      `;
-    } else {
-      return `
-        <h3 style="margin-bottom: 6px;">User & Donor Login 🩸</h3>
-        <p style="color: var(--text-secondary); margin-bottom: 16px; font-size: 0.88rem;">
-          Sign in to view your donor profile and request history.
-        </p>
-        <div class="login-role-selector">
-          <button class="login-role-btn active" onclick="switchLoginRole('user')">🩸 Donor / User</button>
-          <button class="login-role-btn" onclick="switchLoginRole('admin')">🛡️ Administrator</button>
+        ` : ''}
+
+        <div class="form-group" style="text-align: left; margin-bottom: 14px;">
+          <label>${isAdmin && !isSignup ? 'Admin Passcode' : 'Password'}</label>
+          <input type="password" class="form-control" id="auth-pass" placeholder="${isAdmin && !isSignup ? 'Enter admin passcode' : '••••••••'}" required>
         </div>
-        <form onsubmit="handleModalUserLogin(event)">
-          <div class="form-group" style="text-align: left; margin-bottom: 12px;">
-            <label>Email or Phone</label>
-            <input type="text" class="form-control" id="modal-user-id" placeholder="your@email.com" required>
-          </div>
-          <div class="form-group" style="text-align: left; margin-bottom: 16px;">
-            <label>Password</label>
-            <input type="password" class="form-control" id="modal-user-pass" placeholder="••••••••" required>
-          </div>
-          <button type="submit" class="btn btn-primary btn-lg" style="width: 100%;">
-            🔓 Sign In as Donor
-          </button>
-        </form>
-      `;
-    }
+
+        <button type="submit" class="btn btn-primary btn-lg glow-card" style="width: 100%; font-weight: 700;">
+          ${isSignup ? '🚀 Create Account & Sign Up' : (isAdmin ? '🛡️ Login as Administrator' : '🔓 Sign In to Account')}
+        </button>
+      </form>
+
+      <!-- Mode Switcher -->
+      <div style="margin-top: 18px; padding-top: 14px; border-top: 1px dashed var(--border-color); text-align: center; font-size: 0.88rem;">
+        ${isSignup ? `
+          <span style="color: var(--text-secondary);">Already have an account?</span> 
+          <a href="#" style="color: var(--accent); font-weight: 700; text-decoration: underline; margin-left: 4px;" onclick="event.preventDefault(); switchAuthMode('login', '${r}');">Log In here</a>
+        ` : `
+          <span style="color: var(--text-secondary);">Don't have an account yet?</span> 
+          <a href="#" style="color: var(--accent); font-weight: 700; text-decoration: underline; margin-left: 4px;" onclick="event.preventDefault(); switchAuthMode('signup', '${r}');">Sign Up here</a>
+        `}
+      </div>
+    `;
   };
 
   let overlay = document.querySelector('.modal-overlay');
@@ -1616,9 +1656,9 @@ function openLoginModal(initialRole = 'user') {
   overlay.innerHTML = `
     <div class="modal" id="login-modal-box" style="max-width: 440px;">
       <div id="login-modal-content">
-        ${getModalBody(initialRole)}
+        ${getModalBody(mode, role)}
       </div>
-      <div style="margin-top: 16px; text-align: center;">
+      <div style="margin-top: 14px; text-align: center;">
         <button class="btn btn-outline btn-sm" onclick="closeModal()">Close</button>
       </div>
     </div>
@@ -1632,32 +1672,115 @@ function openLoginModal(initialRole = 'user') {
   requestAnimationFrame(() => overlay.classList.add('active'));
 }
 
-function switchLoginRole(role) {
-  const container = document.getElementById('login-modal-content');
-  if (container) {
-    openLoginModal(role);
-  }
+function openLoginModal(initialRole = 'user') {
+  openAuthModal('signup', initialRole);
 }
 
-function handleModalAdminLogin(e) {
+function switchAuthRole(mode, role) {
+  openAuthModal(mode, role);
+}
+
+function switchAuthMode(mode, role) {
+  openAuthModal(mode, role);
+}
+
+function handleAuthSignup(e, role) {
   e.preventDefault();
-  const pass = document.getElementById('modal-admin-passcode').value;
-  if (pass === 'admin123' || pass === 'admin') {
+  const name = document.getElementById('auth-name').value;
+  const email = document.getElementById('auth-email').value;
+  const phone = document.getElementById('auth-phone').value;
+  const pass = document.getElementById('auth-pass').value;
+
+  const nowIso = new Date().toISOString();
+  const nowFormatted = new Date().toLocaleString();
+
+  const userAccount = {
+    name,
+    email,
+    phone,
+    role,
+    createdAt: nowIso,
+    createdAtFormatted: nowFormatted
+  };
+
+  // 1. Save Sign Up record to Firebase Firestore collection 'user_accounts'
+  if (isFirebaseConnected && db) {
+    db.collection('user_accounts').add(userAccount).catch(err => console.error('Sign Up Firestore Error:', err));
+  }
+
+  // 2. Log login timestamp & activity in Firebase Firestore collection 'user_logins'
+  const loginTrack = {
+    userEmail: email,
+    userName: name,
+    role: role,
+    action: 'Account Created & Logged In',
+    loginTimestamp: nowIso,
+    loginTimestampFormatted: nowFormatted,
+    deviceInfo: navigator.userAgent
+  };
+
+  if (isFirebaseConnected && db) {
+    db.collection('user_logins').add(loginTrack).catch(err => console.error('Login Tracking Error:', err));
+  }
+
+  currentUserAccount = userAccount;
+  if (role === 'admin') {
     isAdminLoggedIn = true;
-    closeModal();
-    showToast('Administrator login successful! Entering Admin Control Center...', 'success');
+  }
+
+  closeModal();
+  updateAuthHeader();
+
+  showToast(`🎉 Welcome to LifeLink, ${name}! Account created & login logged at ${nowFormatted}.`, 'success');
+
+  if (role === 'admin') {
     navigateTo('admin');
   } else {
-    showToast('Invalid administrator passcode. Access denied.', 'error');
+    navigateTo('dashboard');
   }
 }
 
-function handleModalUserLogin(e) {
+function handleAuthLogin(e, role) {
   e.preventDefault();
-  const userId = document.getElementById('modal-user-id').value;
+  const email = document.getElementById('auth-email').value;
+  const pass = document.getElementById('auth-pass').value;
+
+  const nowIso = new Date().toISOString();
+  const nowFormatted = new Date().toLocaleString();
+
+  if (role === 'admin') {
+    if (pass !== 'admin123' && pass !== 'admin') {
+      showToast('Invalid administrator passcode. Access denied.', 'error');
+      return;
+    }
+    isAdminLoggedIn = true;
+  }
+
+  const loginTrack = {
+    userEmail: email,
+    role: role,
+    action: 'User Logged In',
+    loginTimestamp: nowIso,
+    loginTimestampFormatted: nowFormatted,
+    deviceInfo: navigator.userAgent
+  };
+
+  // Save login timestamp & session activity to Firebase Firestore collection 'user_logins'
+  if (isFirebaseConnected && db) {
+    db.collection('user_logins').add(loginTrack).catch(err => console.error('Login Track Error:', err));
+  }
+
+  currentUserAccount = { email, role };
   closeModal();
-  showToast(`Welcome back, ${userId.split('@')[0]}!`, 'success');
-  navigateTo('dashboard');
+  updateAuthHeader();
+
+  showToast(`🔓 Sign in successful (${role === 'admin' ? 'Administrator' : 'User'})! Login logged at ${nowFormatted}.`, 'success');
+
+  if (role === 'admin') {
+    navigateTo('admin');
+  } else {
+    navigateTo('dashboard');
+  }
 }
 
 // ===== HEADER SCROLL =====
