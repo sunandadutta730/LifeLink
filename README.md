@@ -9,7 +9,7 @@
 
 **An intelligent, real-time blood donation matching & emergency dispatch platform built to reduce critical blood shortage response times.**
 
-[Live Web App](https://riddhikaghosh.github.io/LifeLink/) · [Report Bug](https://github.com/RiddhikaGhosh/LifeLink/issues) · [Request Feature](https://github.com/RiddhikaGhosh/LifeLink/issues)
+[Live Web App](https://sunandadutta730.github.io/LifeLink/) · [Report Bug](https://github.com/sunandadutta730/LifeLink/issues) · [Request Feature](https://github.com/sunandadutta730/LifeLink/issues)
 
 </div>
 
@@ -78,7 +78,7 @@ For hackathon evaluators, judges, and testing:
 
 ### Step 1: Clone Repository
 ```bash
-git clone https://github.com/RiddhikaGhosh/LifeLink.git
+git clone https://github.com/sunandadutta730/LifeLink.git
 cd LifeLink
 ```
 
@@ -103,11 +103,11 @@ To host this repository live for free on GitHub Pages:
    git commit -m "Deploy LifeLink Smart Blood Network"
    git push origin main
    ```
-2. Go to your GitHub repository on `github.com`: **RiddhikaGhosh/LifeLink**.
+2. Go to your GitHub repository on `github.com`: **sunandadutta730/LifeLink**.
 3. Click **Settings** ➔ **Pages** (under Code and automation).
 4. Under **Build and deployment** ➔ **Source**, choose **Deploy from a branch**.
 5. Select branch: `main` / folder: `/ (root)` ➔ Click **Save**.
-6. Your live site will be published at: **`https://riddhikaghosh.github.io/LifeLink/`**
+6. Your live site will be published at: **`https://sunandadutta730.github.io/LifeLink/`**
 
 ---
 
