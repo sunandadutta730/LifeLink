@@ -1864,6 +1864,39 @@ function switchAuthMode(mode, role) {
   openAuthModal(mode, role);
 }
 
+// Local accounts store
+let SAVED_ACCOUNTS_MAP = JSON.parse(localStorage.getItem('lifelink_all_accounts') || '{}');
+
+function saveAccountToLocalStore(account) {
+  if (!account || !account.email) return;
+  SAVED_ACCOUNTS_MAP[account.email.toLowerCase()] = account;
+  localStorage.setItem('lifelink_all_accounts', JSON.stringify(SAVED_ACCOUNTS_MAP));
+}
+
+function findExistingAccount(email) {
+  if (!email) return null;
+  const cleanEmail = email.toLowerCase().trim();
+  
+  if (SAVED_ACCOUNTS_MAP[cleanEmail]) {
+    return SAVED_ACCOUNTS_MAP[cleanEmail];
+  }
+  
+  const donorMatch = registeredDonors.find(d => d.email && d.email.toLowerCase() === cleanEmail);
+  if (donorMatch) {
+    return {
+      name: donorMatch.name,
+      email: donorMatch.email,
+      phone: donorMatch.phone,
+      pfpUrl: donorMatch.pfpUrl || null,
+      blood: donorMatch.blood,
+      city: donorMatch.city,
+      role: 'user'
+    };
+  }
+
+  return null;
+}
+
 function handleAuthSignup(e, role) {
   e.preventDefault();
   const name = document.getElementById('auth-name').value;
@@ -1883,10 +1916,11 @@ function handleAuthSignup(e, role) {
     createdAtFormatted: nowFormatted
   };
 
-  // 1. Save Sign Up record to Firebase Firestore collection 'user_accounts'
+  // Save account to local store and Firebase Firestore
+  saveAccountToLocalStore(userAccount);
   saveUserAccountToFirebase(userAccount);
 
-  // 2. Log login timestamp & activity in Firebase Firestore collection 'user_logins'
+  // Log login timestamp & activity in Firebase Firestore
   const loginTrack = {
     userEmail: email,
     userName: name,
@@ -1918,7 +1952,7 @@ function handleAuthSignup(e, role) {
 
 function handleAuthLogin(e, role) {
   e.preventDefault();
-  const email = document.getElementById('auth-email').value;
+  const email = document.getElementById('auth-email').value.trim();
   const pass = document.getElementById('auth-pass').value;
 
   const nowIso = new Date().toISOString();
@@ -1931,7 +1965,40 @@ function handleAuthLogin(e, role) {
     }
     setAdminLoggedIn(true);
   } else {
-    setLoggedInUser({ email, role, name: email.split('@')[0] });
+    // 1. Restore profile from local store or registered donors
+    let userAcc = findExistingAccount(email);
+    if (!userAcc) {
+      userAcc = {
+        name: email.split('@')[0],
+        email: email,
+        phone: '',
+        role: role
+      };
+    }
+    setLoggedInUser(userAcc);
+
+    // 2. Query Firebase Firestore users_and_donors to fetch profile live
+    if (typeof firebase !== 'undefined' && firebase.apps.length && email) {
+      try {
+        firebase.firestore().collection('users_and_donors').where('email', '==', email).get().then(snapshot => {
+          if (!snapshot.empty) {
+            const data = snapshot.docs[0].data();
+            const restoredAcc = {
+              name: data.name || userAcc.name,
+              email: data.email || userAcc.email,
+              phone: data.phone || userAcc.phone,
+              pfpUrl: data.pfpUrl || userAcc.pfpUrl || null,
+              blood: data.blood || userAcc.blood,
+              city: data.city || userAcc.city,
+              role: role
+            };
+            saveAccountToLocalStore(restoredAcc);
+            setLoggedInUser(restoredAcc);
+            console.log('✅ User profile restored from Firebase Firestore:', restoredAcc.name);
+          }
+        }).catch(err => console.error('Firestore profile fetch error:', err));
+      } catch (e) { }
+    }
   }
 
   const loginTrack = {
@@ -1943,12 +2010,12 @@ function handleAuthLogin(e, role) {
     deviceInfo: navigator.userAgent
   };
 
-  // Save login timestamp & session activity to Firebase Firestore collection 'user_logins'
   saveUserLoginToFirebase(loginTrack);
 
   closeModal();
 
-  showToast(`🔓 Sign in successful (${role === 'admin' ? 'Administrator' : 'User'})! Login logged at ${nowFormatted}.`, 'success');
+  const userDisplayName = currentUserAccount ? (currentUserAccount.name || email) : 'User';
+  showToast(`🔓 Welcome back, ${userDisplayName}! Login logged at ${nowFormatted}.`, 'success');
 
   if (role === 'admin') {
     navigateTo('admin');
