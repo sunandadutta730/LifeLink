@@ -1,0 +1,19 @@
+# ===== LifeLink .gitignore =====
+
+# Firebase config with real API keys — NEVER push this
+firebase-config.js
+
+# Node modules (if any)
+node_modules/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor directories
+.vscode/
+.idea/
+
+# Temporary files
+*.log
+*.tmp
