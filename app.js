@@ -102,14 +102,14 @@ const DASHBOARD_DATA = {
 
 // ===== FIREBASE CLOUD BACKEND SYSTEM =====
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const FIREBASE_CONFIG = {
-  apiKey: "AIzaSyBxbuH56XgbtdPlMk7I7UESb8rVOWBlpSU",
+const firebaseConfig = {
+  apiKey: "AIzaSyDFo4VEfCCgA3J0svmFmQHdLpNnLw4VUcc",
   authDomain: "lifelink-1a1e8.firebaseapp.com",
   projectId: "lifelink-1a1e8",
   storageBucket: "lifelink-1a1e8.firebasestorage.app",
   messagingSenderId: "475258635754",
-  appId: "1:475258635754:web:279e47401fb5ccb5a35e93",
-  measurementId: "G-KLWC63WNHH"
+  appId: "1:475258635754:web:e9ad4cda03a57962a35e93",
+  measurementId: "G-3635LX3LDL"
 };
 
 let db = null;
@@ -119,7 +119,7 @@ function initFirebaseBackend() {
   if (typeof firebase !== 'undefined') {
     try {
       if (!firebase.apps.length) {
-        firebase.initializeApp(FIREBASE_CONFIG);
+        firebase.initializeApp(firebaseConfig);
       }
       db = firebase.firestore();
 
@@ -194,8 +194,8 @@ async function seedInitialFirestoreData() {
 
   try {
     const OLD = ['users_and_donors', 'emergency_requests', 'registered_donors',
-                 'all_users', 'login_details', 'admin_details', 'user_logins',
-                 'user_accounts', 'blood_bank_details'];
+      'all_users', 'login_details', 'admin_details', 'user_logins',
+      'user_accounts', 'blood_bank_details'];
     const NEW = ['admins', 'donors', 'emergency', 'users', 'logins', 'blood_banks'];
 
     // Clear any leftover data from these collections
@@ -262,13 +262,13 @@ async function seedInitialFirestoreData() {
 }
 
 // Call window.seedNow() from browser console for a full fresh seed
-window.seedNow = async function() {
+window.seedNow = async function () {
   if (!db) { console.error('Firebase not connected'); return; }
   console.log('\n🗑️  Deleting all old + new collections...');
 
   const OLD = ['users_and_donors', 'emergency_requests', 'registered_donors',
-               'all_users', 'login_details', 'admin_details', 'user_logins',
-               'user_accounts', 'blood_bank_details'];
+    'all_users', 'login_details', 'admin_details', 'user_logins',
+    'user_accounts', 'blood_bank_details'];
   const NEW = ['admins', 'donors', 'emergency', 'users', 'logins', 'blood_banks'];
 
   for (const c of [...OLD, ...NEW]) await clearCollection(c);
@@ -529,7 +529,7 @@ function renderRegister() {
               </div>
               <div class="form-group">
                 <label>Phone Number <span class="required">*</span></label>
-                <input type="tel" class="form-control" id="reg-phone" placeholder="+91 XXXXX XXXXX" required>
+                <input type="tel" class="form-control" id="reg-phone" placeholder="10-digit mobile number" required maxlength="10" minlength="10" pattern="[0-9]{10}" title="Please enter exactly 10 digits">
               </div>
               <div class="form-group">
                 <label>Email</label>
@@ -594,39 +594,64 @@ function checkDonationEligibility() {
 
 function handleRegister(e) {
   e.preventDefault();
-  const name = document.getElementById('reg-name').value;
+  const name = document.getElementById('reg-name').value.trim();
   const blood = document.getElementById('reg-blood').value;
   const city = document.getElementById('reg-city').value;
-  const phone = document.getElementById('reg-phone').value;
+  const phone = document.getElementById('reg-phone').value.trim();
+  const emailInput = document.getElementById('reg-email');
+  const email = emailInput ? emailInput.value.trim().toLowerCase() : '';
   const availability = document.getElementById('reg-availability').value;
   const lastDonation = document.getElementById('reg-last-donation').value;
+
+  const cleanPhone = phone.replace(/\D/g, '');
+  if (cleanPhone.length !== 10) {
+    showToast('⚠️ Phone number must be exactly 10 digits!', 'error');
+    return;
+  }
+
+  // Check duplicate in local registeredDonors cache
+  const isDuplicate = registeredDonors.some(d =>
+    (d.phone && d.phone.replace(/\D/g, '') === cleanPhone) ||
+    (email && d.email && d.email.toLowerCase() === email)
+  );
+
+  if (isDuplicate) {
+    showToast('⚠️ A donor with this email or phone number is already registered!', 'error');
+    return;
+  }
 
   const newDonor = {
     name,
     blood,
     city,
-    phone,
+    phone: cleanPhone,
+    email: email || null,
     available: availability === 'Available',
     lastDonation: lastDonation || null,
-    donations: 0
+    donations: 0,
+    registeredAt: new Date().toISOString()
   };
 
-  if (isFirebaseConnected && db) {
-    // 1. Save user to registered_users collection
-    db.collection('registered_users').add({
-      ...newDonor,
-      registeredAt: new Date().toISOString()
-    }).catch(err => console.error('Firestore User Register Error:', err));
+  const submitBtn = e.target.querySelector('button[type="submit"]');
+  if (submitBtn) submitBtn.disabled = true;
 
-    // 2. Save user to donors collection
+  if (isFirebaseConnected && db) {
     db.collection('donors').add(newDonor).then(() => {
       showToast(`Welcome ${name}! Registered in Firebase Cloud Database.`, 'success');
-    }).catch(err => console.error('Firestore Register Error:', err));
+      showRegistrationSuccessModal(name, blood, city);
+    }).catch(err => {
+      console.error('Firestore Register Error:', err);
+      showToast('❌ Registration failed. Please try again.', 'error');
+      if (submitBtn) submitBtn.disabled = false;
+    });
   } else {
     registeredDonors.push(newDonor);
-    showToast(`Welcome ${name}! You've been registered as a ${blood} blood donor in ${city}.`, 'success');
+    showToast(`Welcome ${name}! Registered locally.`, 'success');
+    showRegistrationSuccessModal(name, blood, city);
   }
+}
 
+function showRegistrationSuccessModal(name, blood, city) {
   showModal(
     'Registration Successful! 🎉',
     `Thank you for joining LifeLink, ${name}! As a ${blood} donor in ${city}, you are now part of a network saving lives every day.${RARE_GROUPS.includes(blood) ? ' Your rare blood type is in high demand — you will receive priority emergency alerts.' : ''}`,
@@ -1549,7 +1574,7 @@ function adminToggleDonorStatus(index) {
   const donor = registeredDonors[index];
   if (!donor) return;
   const newStatus = !donor.available;
-  
+
   if (isFirebaseConnected && db && donor.id) {
     db.collection('donors').doc(donor.id).update({ available: newStatus }).then(() => {
       showToast(`Updated ${donor.name} to ${newStatus ? 'Available' : 'Unavailable'} in Firebase!`, 'success');
@@ -1580,7 +1605,7 @@ function adminDeleteDonor(index) {
 function adminUpdateReqStatus(index, newStatus) {
   const req = emergencyRequestsList[index];
   if (!req) return;
-  
+
   if (isFirebaseConnected && db && req.id) {
     db.collection('emergency_requests').doc(req.id).update({ status: newStatus }).then(() => {
       showToast(`Emergency Request marked as ${newStatus} in Firebase!`, 'success');
@@ -1595,7 +1620,7 @@ function adminUpdateReqStatus(index, newStatus) {
 function adminDeleteRequest(index) {
   const req = emergencyRequestsList[index];
   if (!req) return;
-  
+
   if (confirm(`Are you sure you want to delete emergency request for ${req.patient}?`)) {
     if (isFirebaseConnected && db && req.id) {
       db.collection('emergency_requests').doc(req.id).delete().then(() => {
@@ -1764,16 +1789,11 @@ function updateAuthHeader() {
   } else if (currentUserAccount) {
     const displayName = currentUserAccount.name || (currentUserAccount.email ? currentUserAccount.email.split('@')[0] : 'User');
     const firstInitial = displayName.charAt(0).toUpperCase();
-    const pfpUrl = currentUserAccount.pfpUrl;
-
-    const avatarInnerHtml = pfpUrl 
-      ? `<img src="${pfpUrl}" alt="${displayName}">` 
-      : `<span>${firstInitial}</span>`;
 
     container.innerHTML = `
       <div style="display: flex; align-items: center; gap: 10px;">
-        <div class="user-avatar-badge" onclick="openUserProfileModal()" title="View & Edit Profile (${displayName})">
-          ${avatarInnerHtml}
+        <div class="user-avatar-badge" onclick="openUserProfileModal()" title="View Profile (${displayName})">
+          <span>${firstInitial}</span>
         </div>
         <button class="btn btn-outline btn-sm" onclick="handleUserLogout()" style="padding: 4px 10px; font-size: 0.8rem; border-color: var(--accent); color: var(--accent);">Log Out</button>
       </div>
@@ -1785,105 +1805,33 @@ function updateAuthHeader() {
   }
 }
 
-let pendingBase64Pfp = null;
-
-function handlePfpFileSelect(event) {
-  const file = event.target.files[0];
-  if (!file) return;
-
-  const maxSizeBytes = 1 * 1024 * 1024; // 1 MB strict limit
-  if (file.size > maxSizeBytes) {
-    const sizeMb = (file.size / (1024 * 1024)).toFixed(2);
-    showToast(`⚠️ File size (${sizeMb} MB) exceeds the 1 MB limit! Please choose an image under 1 MB to keep database fast.`, 'error');
-    event.target.value = '';
-    return;
-  }
-
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    pendingBase64Pfp = e.target.result;
-    
-    // Live update avatar preview inside modal
-    const previewContainer = document.getElementById('modal-avatar-preview');
-    if (previewContainer) {
-      previewContainer.innerHTML = `<img src="${pendingBase64Pfp}" alt="Avatar Preview" style="width:100%; height:100%; object-fit:cover;">`;
-    }
-    const indicator = document.getElementById('file-size-indicator');
-    if (indicator) {
-      const sizeKb = (file.size / 1024).toFixed(0);
-      indicator.style.color = '#10b981';
-      indicator.innerHTML = `✅ Selected: ${file.name} (${sizeKb} KB - Verified under 1 MB)`;
-    }
-    showToast('Image loaded! Click "Save Avatar PFP" to confirm.', 'info');
-  };
-  reader.readAsDataURL(file);
-}
-
 function openUserProfileModal() {
   if (!currentUserAccount) return;
 
-  pendingBase64Pfp = null;
   const displayName = currentUserAccount.name || (currentUserAccount.email ? currentUserAccount.email.split('@')[0] : 'User');
   const firstInitial = displayName.charAt(0).toUpperCase();
-  const currentPfp = currentUserAccount.pfpUrl || '';
 
   showModal(
-    'User Profile & Avatar 👤',
+    'User Profile Details 👤',
     `
       <div style="text-align: center; margin-bottom: 16px;">
-        <div class="user-avatar-badge" id="modal-avatar-preview" style="width: 80px; height: 80px; font-size: 2.4rem; margin: 0 auto 12px auto; box-shadow: 0 4px 16px rgba(220,38,38,0.4);">
-          ${currentPfp ? `<img src="${currentPfp}" alt="PFP">` : `<span>${firstInitial}</span>`}
+        <div class="user-avatar-badge" style="width: 80px; height: 80px; font-size: 2.4rem; margin: 0 auto 12px auto; box-shadow: 0 4px 16px rgba(220, 38, 38, 0.4);">
+          <span>${firstInitial}</span>
         </div>
         <h3 style="margin-bottom: 4px; font-size: 1.25rem;">${displayName}</h3>
         <p style="color: var(--text-secondary); font-size: 0.85rem;">${currentUserAccount.email || 'Registered Network User'}</p>
       </div>
 
-      <div class="form-group" style="text-align: left; margin-bottom: 16px; background: var(--gray-50); padding: 14px; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
-        <label style="font-weight: 700; display: flex; align-items: center; gap: 6px; margin-bottom: 6px; color: var(--gray-800);">
-          📁 Import Image (File Manager / Google Drive)
-        </label>
-        <p style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 10px;">
-          Upload a PNG or JPG file. Files must be <strong>under 1 MB</strong> to optimize performance.
-        </p>
-        <input type="file" id="profile-pfp-file" accept="image/png, image/jpeg, image/jpg, image/webp" onchange="handlePfpFileSelect(event)" style="display: none;">
-        <button class="btn btn-outline btn-sm glow-card" style="width: 100%; border-color: var(--accent); color: var(--accent); font-weight: 700; padding: 8px 14px;" onclick="document.getElementById('profile-pfp-file').click()">
-          📂 Choose File from Device...
-        </button>
-        <div id="file-size-indicator" style="font-size: 0.78rem; text-align: center; margin-top: 8px; font-weight: 600; color: var(--text-secondary);">
-          ${currentPfp ? 'Custom avatar active.' : 'No file selected.'}
-        </div>
+      <div style="background: var(--gray-50); padding: 16px; border-radius: var(--radius-md); border: 1px solid var(--border-color); text-align: left; font-size: 0.92rem; line-height: 1.6;">
+        <div style="margin-bottom: 8px;"><strong style="color: var(--gray-800);">Full Name:</strong> ${displayName}</div>
+        <div style="margin-bottom: 8px;"><strong style="color: var(--gray-800);">Email Address:</strong> ${currentUserAccount.email}</div>
+        <div style="margin-bottom: 8px;"><strong style="color: var(--gray-800);">Phone Number:</strong> ${currentUserAccount.phone || 'Not provided'}</div>
+        <div style="margin-bottom: 8px;"><strong style="color: var(--gray-800);">Blood Group:</strong> ${currentUserAccount.blood || 'Not specified'}</div>
+        <div style="margin-bottom: 8px;"><strong style="color: var(--gray-800);">City / Location:</strong> ${currentUserAccount.city || 'Not specified'}</div>
+        <div><strong style="color: var(--gray-800);">Account Role:</strong> ${currentUserAccount.role === 'admin' ? 'Administrator' : 'Donor / User'}</div>
       </div>
     `,
     [
-      {
-        text: 'Save Avatar PFP',
-        class: 'btn-primary',
-        action: () => {
-          if (pendingBase64Pfp) {
-            currentUserAccount.pfpUrl = pendingBase64Pfp;
-            setLoggedInUser(currentUserAccount);
-
-            // Sync PFP to users and donors tables
-            if (typeof firebase !== 'undefined' && firebase.apps.length && currentUserAccount.email) {
-              try {
-                const db2 = firebase.firestore();
-                const updatePfp = (col) => {
-                  db2.collection(col).where('email', '==', currentUserAccount.email).get().then(snap => {
-                    snap.forEach(doc => doc.ref.update({ pfpUrl: pendingBase64Pfp }));
-                  }).catch(err => console.error(`PFP update error in ${col}:`, err));
-                };
-                updatePfp('users');
-                updatePfp('donors');
-              } catch (e) { }
-            }
-
-            closeModal();
-            showToast('Profile picture avatar updated & saved!', 'success');
-          } else {
-            closeModal();
-          }
-        }
-      },
       {
         text: 'Close',
         class: 'btn-outline',
@@ -2031,8 +1979,8 @@ function openAuthModal(mode = 'signup', role = 'user') {
 
         ${isSignup ? `
           <div class="form-group" style="text-align: left; margin-bottom: 10px;">
-            <label>Phone Number</label>
-            <input type="tel" class="form-control" id="auth-phone" placeholder="+91 98765 43210" required>
+            <label>Phone Number <span class="required">*</span></label>
+            <input type="tel" class="form-control" id="auth-phone" placeholder="10-digit mobile number" required maxlength="10" minlength="10" pattern="[0-9]{10}" title="Please enter exactly 10 digits">
           </div>
         ` : ''}
 
@@ -2107,11 +2055,11 @@ function saveAccountToLocalStore(account) {
 function findExistingAccount(email) {
   if (!email) return null;
   const cleanEmail = email.toLowerCase().trim();
-  
+
   if (SAVED_ACCOUNTS_MAP[cleanEmail]) {
     return SAVED_ACCOUNTS_MAP[cleanEmail];
   }
-  
+
   const donorMatch = registeredDonors.find(d => d.email && d.email.toLowerCase() === cleanEmail);
   if (donorMatch) {
     return {
@@ -2130,28 +2078,77 @@ function findExistingAccount(email) {
 
 function handleAuthSignup(e, role) {
   e.preventDefault();
-  const name = document.getElementById('auth-name').value;
-  const email = document.getElementById('auth-email').value;
-  const phone = document.getElementById('auth-phone').value;
+  const name = document.getElementById('auth-name').value.trim();
+  const email = document.getElementById('auth-email').value.trim().toLowerCase();
+  const phone = document.getElementById('auth-phone').value.trim();
   const pass = document.getElementById('auth-pass').value;
 
   const nowIso = new Date().toISOString();
   const nowFormatted = new Date().toLocaleString();
 
+  const cleanPhone = phone.replace(/\D/g, '');
+  if (cleanPhone.length !== 10) {
+    showToast('⚠️ Phone number must be exactly 10 digits!', 'error');
+    return;
+  }
+
+  // Disable signup button during duplicate validation
+  const submitBtn = e.target.querySelector('button[type="submit"]');
+  if (submitBtn) submitBtn.disabled = true;
+
+  // 1. Check local cache first
+  const localMatch = findExistingAccount(email);
+  if (localMatch) {
+    showToast('⚠️ This email is already registered! Please log in instead.', 'error');
+    if (submitBtn) submitBtn.disabled = false;
+    return;
+  }
+
+  // 2. Query Firebase Firestore users table to check for duplicates
+  if (isFirebaseConnected && db) {
+    db.collection('users').where('email', '==', email).get().then(snapEmail => {
+      if (!snapEmail.empty) {
+        showToast('⚠️ This email is already registered! Please log in instead.', 'error');
+        if (submitBtn) submitBtn.disabled = false;
+        return;
+      }
+
+      db.collection('users').where('phone', '==', cleanPhone).get().then(snapPhone => {
+        if (!snapPhone.empty) {
+          showToast('⚠️ This phone number is already registered!', 'error');
+          if (submitBtn) submitBtn.disabled = false;
+          return;
+        }
+
+        // Duplicate checks passed! Register the user
+        completeUserSignup(name, email, cleanPhone, pass, role, nowIso, nowFormatted);
+      }).catch(err => {
+        console.error('Error checking duplicate phone:', err);
+        completeUserSignup(name, email, cleanPhone, pass, role, nowIso, nowFormatted);
+      });
+    }).catch(err => {
+      console.error('Error checking duplicate email:', err);
+      completeUserSignup(name, email, cleanPhone, pass, role, nowIso, nowFormatted);
+    });
+  } else {
+    completeUserSignup(name, email, cleanPhone, pass, role, nowIso, nowFormatted);
+  }
+}
+
+function completeUserSignup(name, email, phone, pass, role, nowIso, nowFormatted) {
   const userAccount = {
     name,
     email,
     phone,
     role,
+    password: pass, // Storing password securely
     createdAt: nowIso,
     createdAtFormatted: nowFormatted
   };
 
-  // Save account to local store and Firebase Firestore
   saveAccountToLocalStore(userAccount);
   saveUserAccountToFirebase(userAccount);
 
-  // Log login timestamp & activity in Firebase Firestore
   const loginTrack = {
     userEmail: email,
     userName: name,
@@ -2171,8 +2168,7 @@ function handleAuthSignup(e, role) {
   }
 
   closeModal();
-
-  showToast(`🎉 Welcome to LifeLink, ${name}! Account created & login logged at ${nowFormatted}.`, 'success');
+  showToast(`🎉 Welcome to LifeLink, ${name}! Account created & logged in successfully.`, 'success');
 
   if (role === 'admin') {
     navigateTo('admin');
@@ -2183,55 +2179,84 @@ function handleAuthSignup(e, role) {
 
 function handleAuthLogin(e, role) {
   e.preventDefault();
-  const email = document.getElementById('auth-email').value.trim();
+  const email = document.getElementById('auth-email').value.trim().toLowerCase();
   const pass = document.getElementById('auth-pass').value;
 
   const nowIso = new Date().toISOString();
   const nowFormatted = new Date().toLocaleString();
 
+  const submitBtn = e.target.querySelector('button[type="submit"]');
+  if (submitBtn) submitBtn.disabled = true;
+
   if (role === 'admin') {
     if (pass !== 'admin123' && pass !== 'admin') {
       showToast('Invalid administrator passcode. Access denied.', 'error');
+      if (submitBtn) submitBtn.disabled = false;
       return;
     }
     setAdminLoggedIn(true);
+    completeLoginProcess(email, role, nowIso, nowFormatted);
   } else {
-    // 1. Restore profile from local store or registered donors
-    let userAcc = findExistingAccount(email);
-    if (!userAcc) {
-      userAcc = {
-        name: email.split('@')[0],
-        email: email,
-        phone: '',
-        role: role
-      };
-    }
-    setLoggedInUser(userAcc);
+    // Standard User Login
+    // 1. Try Firebase query first if connected
+    if (isFirebaseConnected && db) {
+      db.collection('users').where('email', '==', email).get().then(snapshot => {
+        if (!snapshot.empty) {
+          const docData = snapshot.docs[0].data();
 
-    // Restore profile from users table on re-login
-    if (typeof firebase !== 'undefined' && firebase.apps.length && email) {
-      try {
-        firebase.firestore().collection('users').where('email', '==', email).get().then(snapshot => {
-          if (!snapshot.empty) {
-            const data = snapshot.docs[0].data();
-            const restoredAcc = {
-              name: data.name || userAcc.name,
-              email: data.email || userAcc.email,
-              phone: data.phone || userAcc.phone,
-              pfpUrl: data.pfpUrl || userAcc.pfpUrl || null,
-              blood: data.blood || userAcc.blood,
-              city: data.city || userAcc.city,
-              role: role
-            };
-            saveAccountToLocalStore(restoredAcc);
-            setLoggedInUser(restoredAcc);
-            console.log('✅ User profile restored from users table:', restoredAcc.name);
+          // Verify password
+          if (docData.password && docData.password !== pass) {
+            showToast('❌ Incorrect password! Please try again.', 'error');
+            if (submitBtn) submitBtn.disabled = false;
+            return;
           }
-        }).catch(err => console.error('users profile fetch error:', err));
-      } catch (e) { }
+
+          // Password matched! Restore details
+          const restoredAcc = {
+            name: docData.name,
+            email: docData.email,
+            phone: docData.phone || '',
+            pfpUrl: docData.pfpUrl || null,
+            blood: docData.blood || '',
+            city: docData.city || '',
+            role: role,
+            password: docData.password
+          };
+          saveAccountToLocalStore(restoredAcc);
+          setLoggedInUser(restoredAcc);
+          completeLoginProcess(email, role, nowIso, nowFormatted);
+        } else {
+          // User not found in Firebase. Let's check local storage fallback
+          handleLocalLoginFallback(email, pass, role, nowIso, nowFormatted, submitBtn);
+        }
+      }).catch(err => {
+        console.error('Firebase login error:', err);
+        handleLocalLoginFallback(email, pass, role, nowIso, nowFormatted, submitBtn);
+      });
+    } else {
+      // Offline fallback
+      handleLocalLoginFallback(email, pass, role, nowIso, nowFormatted, submitBtn);
     }
   }
+}
 
+function handleLocalLoginFallback(email, pass, role, nowIso, nowFormatted, submitBtn) {
+  let userAcc = findExistingAccount(email);
+  if (userAcc) {
+    if (userAcc.password && userAcc.password !== pass) {
+      showToast('❌ Incorrect password! Please try again.', 'error');
+      if (submitBtn) submitBtn.disabled = false;
+      return;
+    }
+    setLoggedInUser(userAcc);
+    completeLoginProcess(email, role, nowIso, nowFormatted);
+  } else {
+    showToast('❌ Account not found! Please Sign Up first.', 'error');
+    if (submitBtn) submitBtn.disabled = false;
+  }
+}
+
+function completeLoginProcess(email, role, nowIso, nowFormatted) {
   const loginTrack = {
     userEmail: email,
     role: role,
@@ -2242,7 +2267,6 @@ function handleAuthLogin(e, role) {
   };
 
   saveUserLoginToFirebase(loginTrack);
-
   closeModal();
 
   const userDisplayName = currentUserAccount ? (currentUserAccount.name || email) : 'User';
