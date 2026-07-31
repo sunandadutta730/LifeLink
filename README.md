@@ -1,17 +1,21 @@
 # 🩸 LifeLink – Smart Blood Donor & Emergency Network
 
-<div align="center">
+<p align="center">
+  <img src="https://img.shields.io/badge/LifeLink-Smart%20Blood%20Network-dc2626?style=for-the-badge&logo=redcross&logoColor=white" alt="LifeLink Banner" />
+  <img src="https://img.shields.io/badge/Backend-Google%20Firebase-ffca28?style=for-the-badge&logo=firebase&logoColor=black" alt="Firebase Connected" />
+  <img src="https://img.shields.io/badge/License-MIT-2563eb?style=for-the-badge" alt="License" />
+  <img src="https://img.shields.io/badge/Status-Hackathon%20Production-10b981?style=for-the-badge&logo=github&logoColor=white" alt="Hackathon Ready" />
+</p>
 
-![LifeLink Banner](https://img.shields.io/badge/LifeLink-Smart%20Blood%20Network-dc2626?style=for-the-badge&logo=heart&logoColor=white)
-![Firebase Connected](https://img.shields.io/badge/Backend-Google%20Firebase-ffca28?style=for-the-badge&logo=firebase&logoColor=black)
-![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)
-![Hackathon Ready](https://img.shields.io/badge/Status-Hackathon%20Production-10b981?style=for-the-badge)
+<p align="center">
+  <b>An intelligent, real-time blood donation matching & emergency dispatch platform built to reduce critical blood shortage response times.</b>
+</p>
 
-**An intelligent, real-time blood donation matching & emergency dispatch platform built to reduce critical blood shortage response times.**
-
-[Live Web App](https://sunandadutta730.github.io/LifeLink/) · [Report Bug](https://github.com/sunandadutta730/LifeLink/issues) · [Request Feature](https://github.com/sunandadutta730/LifeLink/issues)
-
-</div>
+<p align="center">
+  <a href="https://sunandadutta730.github.io/LifeLink/">Live Web App</a> · 
+  <a href="https://github.com/sunandadutta730/LifeLink/issues">Report Bug</a> · 
+  <a href="https://github.com/sunandadutta730/LifeLink/issues">Request Feature</a>
+</p>
 
 ---
 
@@ -36,13 +40,13 @@ Every year, thousands of critical medical emergencies — especially involving r
 
 ## 🛠️ Technology Stack
 
-| Layer | Technology Used |
-| :--- | :--- |
-| **Frontend Core** | HTML5 Semantic Architecture, Vanilla JavaScript (ES6+ Single Page Application) |
-| **Styling & Motion** | Custom CSS3 Design System, Flexbox/Grid, Keyframe Animations, Glassmorphic Utility Design |
-| **Iconography** | Dynamic Inline High-Detail Vector SVG Icons Engine |
-| **Cloud Backend** | Google Firebase (App, Cloud Firestore DB, Realtime Auth API) |
-| **Hosting & CI/CD** | GitHub Pages / Local HTTP Server |
+| Layer | Technology Used | Badges |
+| :--- | :--- | :--- |
+| **Frontend Core** | HTML5 Semantic Architecture, Vanilla JavaScript (ES6+ Single Page Application) | <img src="https://img.shields.io/badge/HTML5-E34F26?style=flat-square&logo=html5&logoColor=white" /> <img src="https://img.shields.io/badge/JavaScript-F7DF1E?style=flat-square&logo=javascript&logoColor=black" /> |
+| **Styling & Motion** | Custom CSS3 Design System, Flexbox/Grid, Keyframe Animations | <img src="https://img.shields.io/badge/CSS3-1572B6?style=flat-square&logo=css3&logoColor=white" /> |
+| **Iconography** | Dynamic Inline High-Detail Vector SVG Icons Engine | <img src="https://img.shields.io/badge/SVG-000000?style=flat-square&logo=svg&logoColor=white" /> |
+| **Cloud Backend** | Google Firebase (App, Cloud Firestore DB, Realtime Auth API) | <img src="https://img.shields.io/badge/Firebase-FFCA28?style=flat-square&logo=firebase&logoColor=black" /> |
+| **Hosting & CI/CD** | GitHub Pages / Local HTTP Server | <img src="https://img.shields.io/badge/GitHub%20Pages-22272E?style=flat-square&logo=github&logoColor=white" /> |
 
 ---
 
