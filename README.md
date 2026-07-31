@@ -116,7 +116,7 @@ To host this repository live for free on GitHub Pages:
 ```
 LifeLink/
 ├── index.html         # Main SPA HTML structure & Firebase CDN scripts
-├── index.css          # Design system tokens, glassmorphism & motion animations
+├── style.css          # Design system tokens, glassmorphism & motion animations
 ├── app.js             # Core SPA Router, SVG Icons Engine & Firebase Cloud Sync
 └── README.md          # Project Documentation & Hackathon Guide
 ```
