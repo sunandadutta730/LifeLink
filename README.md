@@ -1,21 +1,17 @@
 # 🩸 LifeLink – Smart Blood Donor & Emergency Network
 
-<p align="center">
-  <img src="https://img.shields.io/badge/LifeLink-Smart%20Blood%20Network-dc2626?style=for-the-badge&logo=redcross&logoColor=white" alt="LifeLink Banner" />
-  <img src="https://img.shields.io/badge/Backend-Google%20Firebase-ffca28?style=for-the-badge&logo=firebase&logoColor=black" alt="Firebase Connected" />
-  <img src="https://img.shields.io/badge/License-MIT-2563eb?style=for-the-badge" alt="License" />
-  <img src="https://img.shields.io/badge/Status-Hackathon%20Production-10b981?style=for-the-badge&logo=github&logoColor=white" alt="Hackathon Ready" />
-</p>
+<div align="center">
 
-<p align="center">
-  <b>An intelligent, real-time blood donation matching & emergency dispatch platform built to reduce critical blood shortage response times.</b>
-</p>
+![LifeLink Banner](https://img.shields.io/badge/LifeLink-Smart%20Blood%20Network-dc2626?style=for-the-badge)
+![Firebase Connected](https://img.shields.io/badge/Backend-Google%20Firebase-ffca28?style=for-the-badge&logo=firebase)
+![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)
+![Hackathon Ready](https://img.shields.io/badge/Status-Hackathon%20Production-10b981?style=for-the-badge)
 
-<p align="center">
-  <a href="https://sunandadutta730.github.io/LifeLink/">Live Web App</a> · 
-  <a href="https://github.com/sunandadutta730/LifeLink/issues">Report Bug</a> · 
-  <a href="https://github.com/sunandadutta730/LifeLink/issues">Request Feature</a>
-</p>
+**An intelligent, real-time blood donation matching & emergency dispatch platform built to reduce critical blood shortage response times.**
+
+[Live Web App](https://sunandadutta730.github.io/LifeLink/) · [Report Bug](https://github.com/sunandadutta730/LifeLink/issues) · [Request Feature](https://github.com/sunandadutta730/LifeLink/issues)
+
+</div>
 
 ---
 
