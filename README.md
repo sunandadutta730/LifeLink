@@ -126,9 +126,11 @@ LifeLink/
 ## 📄 License & Credits
 
 Designed & Developed with ❤️ by:
-* **Riddhika Ghosh**
-* **Souham Dutta**
 * **Sunanda Dutta**
+* **Souham Dutta**
+* **Riddhika Ghosh**
+
+
 
 
 Built for the **Hackathon Competition**.  
