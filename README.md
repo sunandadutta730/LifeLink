@@ -132,4 +132,4 @@ Designed & Developed with ❤️ by:
 
 
 Built for the **Hackathon Competition**.  
-Licensed under the [MIT License](LICENSE).
+Licensed under the [MIT License](LICENSE)..
