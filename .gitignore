@@ -1,10 +1,9 @@
 # ===== LifeLink .gitignore =====
 
-# Firebase config with real API keys — NEVER push this
-firebase-config.js
-
-# Seed script contains hardcoded API keys — local use only
+# Seed script — local use only (has hardcoded keys for local Firestore seeding)
 seed.js
+
+# Note: Firebase config is now embedded inline in index.html (no firebase-config.js needed)
 
 # Node modules (if any)
 node_modules/

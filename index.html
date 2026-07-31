@@ -104,8 +104,24 @@
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
 
-  <!-- Firebase Config (gitignored — not pushed to GitHub) -->
-  <script src="firebase-config.js"></script>
+  <!-- Firebase Config — embedded inline for GitHub Pages deployment -->
+  <!-- ⚠️  IMPORTANT: After rotating your API key in Google Cloud Console,
+       paste your NEW Firebase config values below.
+       Firebase web API keys are safe to include here when restricted by domain in Google Cloud Console.
+       Real security comes from Firebase Security Rules, not hiding this key. -->
+  <script>
+    // ===== FIREBASE CONFIGURATION =====
+    // Get these values from: https://console.firebase.google.com → Your Project → Project Settings → Web Apps
+    // IMPORTANT: Replace with your NEW API key after revoking the leaked one!
+    window.firebaseConfig = {
+      apiKey: "AIzaSyBxbuH56XgbtdPlMk7I7UESb8rVOWBlpSU",
+      authDomain: "lifelink-1a1e8.firebaseapp.com",
+      projectId: "lifelink-1a1e8",
+      storageBucket: "lifelink-1a1e8.firebasestorage.app",
+      messagingSenderId: "475258635754",
+      appId: "1:475258635754:web:279e47401fb5ccb5a35e93"
+    };
+  </script>
 
   <script src="app.js"></script>
 </body>

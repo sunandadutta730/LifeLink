@@ -101,8 +101,15 @@ const DASHBOARD_DATA = {
 };
 
 // ===== FIREBASE CLOUD BACKEND SYSTEM =====
-// API keys are loaded from firebase-config.js (gitignored — see firebase-config.example.js for setup)
-// window.firebaseConfig is set by firebase-config.js before this script runs
+const DEFAULT_FIREBASE_CONFIG = {
+  apiKey: "AIzaSyDFo4VEfCCgA3J0svmFmQHdLpNnLw4VUcc",
+  authDomain: "lifelink-1a1e8.firebaseapp.com",
+  projectId: "lifelink-1a1e8",
+  storageBucket: "lifelink-1a1e8.firebasestorage.app",
+  messagingSenderId: "475258635754",
+  appId: "1:475258635754:web:e9ad4cda03a57962a35e93",
+  measurementId: "G-3635LX3LDL"
+};
 
 let db = null;
 let isFirebaseConnected = false;
@@ -111,11 +118,8 @@ function initFirebaseBackend() {
   if (typeof firebase !== 'undefined') {
     try {
       if (!firebase.apps.length) {
-        if (!window.firebaseConfig) {
-          console.error('❌ firebase-config.js not found! Copy firebase-config.example.js → firebase-config.js and fill in your keys.');
-          return;
-        }
-        firebase.initializeApp(window.firebaseConfig);
+        const config = window.firebaseConfig || DEFAULT_FIREBASE_CONFIG;
+        firebase.initializeApp(config);
       }
       db = firebase.firestore();
 
