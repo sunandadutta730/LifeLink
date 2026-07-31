@@ -3,6 +3,9 @@
 # Firebase config with real API keys — NEVER push this
 firebase-config.js
 
+# Seed script contains hardcoded API keys — local use only
+seed.js
+
 # Node modules (if any)
 node_modules/
 
