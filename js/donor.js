@@ -103,6 +103,7 @@ function checkDonationEligibility() {
 }
 
 function renderRegister() {
+  const donorCount = registeredDonors.filter(d => d.available).length;
   return `
     <div class="page-header">
       <div class="container">
@@ -115,13 +116,37 @@ function renderRegister() {
       <div class="container">
         <div class="form-card animate-on-scroll">
           <h2>Donor Registration</h2>
-          <p class="subtitle">Enter your details to join the LifeLink active donor database.</p>
+          <p class="subtitle">Enter your details to join the LifeLink active donor database and help save lives in your city.</p>
+
+          <div class="reg-info-strip">
+            <div class="reg-info-item">
+              <div class="reg-info-icon red">${SVG_ICONS.users(18, 'var(--red-600)')}</div>
+              <div class="reg-info-text">
+                <div class="label">Active Donors</div>
+                <div class="value">${donorCount}+ Available</div>
+              </div>
+            </div>
+            <div class="reg-info-item">
+              <div class="reg-info-icon green">${SVG_ICONS.check(18, '#10b981')}</div>
+              <div class="reg-info-text">
+                <div class="label">Donation Interval</div>
+                <div class="value">Every 90 Days</div>
+              </div>
+            </div>
+            <div class="reg-info-item">
+              <div class="reg-info-icon blue">${SVG_ICONS.shield(18, 'var(--blue-500)')}</div>
+              <div class="reg-info-text">
+                <div class="label">Privacy</div>
+                <div class="value">100% Secure</div>
+              </div>
+            </div>
+          </div>
 
           <form id="donor-form" onsubmit="handleRegister(event)">
             <div class="form-grid">
               <div class="form-group">
                 <label>Full Name <span class="required">*</span></label>
-                <input type="text" class="form-control" id="reg-name" placeholder="e.g. Rahul Sharma" required>
+                <input type="text" class="form-control" id="reg-name" placeholder="e.g. Rahul Sharma" required autocomplete="name">
               </div>
 
               <div class="form-group">
@@ -142,20 +167,24 @@ function renderRegister() {
 
               <div class="form-group">
                 <label>Phone Number <span class="required">*</span></label>
-                <input type="tel" class="form-control" id="reg-phone" placeholder="10-digit mobile number" required maxlength="10" minlength="10" pattern="[0-9]{10}">
+                <input type="tel" class="form-control" id="reg-phone" placeholder="10-digit mobile number" required maxlength="10" minlength="10" pattern="[0-9]{10}" autocomplete="tel">
               </div>
 
               <div class="form-group full-width">
-                <label>Last Donation Date (Optional)</label>
+                <label>Last Donation Date <span style="font-weight:400; color:var(--text-secondary);">(Optional)</span></label>
                 <input type="date" class="form-control" id="reg-last-donation" onchange="checkDonationEligibility()">
                 <div id="donation-warning" style="display:none;"></div>
               </div>
             </div>
 
-            <div style="margin-top: 32px; text-align: center;">
-              <button type="submit" class="btn btn-primary btn-lg glow-card" style="width: 100%; max-width: 400px;">
+            <div class="form-submit-area">
+              <button type="submit" class="btn btn-primary btn-lg glow-card">
                 ${SVG_ICONS.heart(20)} Register as Active Donor
               </button>
+              <p class="form-submit-note">
+                ${SVG_ICONS.shield(14, 'var(--gray-400)')}
+                Your information is saved securely and shared only with emergency contacts.
+              </p>
             </div>
           </form>
         </div>

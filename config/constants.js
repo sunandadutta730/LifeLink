@@ -18,11 +18,11 @@ const RARE_GROUPS = ['AB-', 'B-', 'O-'];
 const CITIES = ['Mumbai', 'Delhi', 'Bangalore', 'Hyderabad', 'Chennai', 'Kolkata', 'Pune', 'Ahmedabad', 'Jaipur', 'Lucknow'];
 
 const DEFAULT_FIREBASE_CONFIG = {
-  apiKey: "AIzaSyDFo4VEfCCgA3J0svmFmQHdLpNnLw4VUcc",
-  authDomain: "lifelink-1a1e8.firebaseapp.com",
-  projectId: "lifelink-1a1e8",
-  storageBucket: "lifelink-1a1e8.firebasestorage.app",
-  messagingSenderId: "475258635754",
-  appId: "1:475258635754:web:e9ad4cda03a57962a35e93",
-  measurementId: "G-3635LX3LDL"
+  apiKey: "AIzaSyCrKfs49UrCQ-FBU-jOOrE5iEq9X2XDyVY",
+  authDomain: "lifeline-2026.firebaseapp.com",
+  projectId: "lifeline-2026",
+  storageBucket: "lifeline-2026.firebasestorage.app",
+  messagingSenderId: "888679569417",
+  appId: "1:888679569417:web:756be3939a005cc129c0d8",
+  measurementId: "G-JLGKZHSEWK"
 };

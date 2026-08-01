@@ -50,7 +50,10 @@
   .stat-card { padding: 20px; }
   .stat-number { font-size: 1.75rem; }
   .form-grid { grid-template-columns: 1fr; }
-  .form-card { padding: 24px; }
+  .form-card { padding: 24px 18px; }
+  .form-card h2 { font-size: 1.5rem; }
+  .reg-info-strip { flex-direction: column; gap: 10px; margin-bottom: 24px; }
+  .form-submit-area .btn { max-width: 100%; }
   .crisis-stats { flex-direction: column; }
   .crisis-visual { grid-template-columns: repeat(2, 1fr); }
   .search-bar { flex-direction: column; }

@@ -1,78 +1,157 @@
 /* ===== LifeLink Form Controls & Validation Styles ===== */
 
+/* ===== DONOR REGISTRATION PAGE ===== */
 .form-card {
   background: var(--bg-primary);
   border: 1px solid var(--border-color);
-  border-radius: var(--radius-lg);
-  padding: 40px;
-  max-width: 800px;
+  border-radius: var(--radius-xl);
+  padding: 48px;
+  max-width: 860px;
   margin: 0 auto;
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-md);
+  position: relative;
+  overflow: hidden;
 }
+
+.form-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--red-500), var(--red-400), var(--red-600));
+}
+
 .form-card h2 {
-  font-size: 1.75rem;
+  font-size: 1.85rem;
   font-weight: 800;
   margin-bottom: 8px;
+  color: var(--gray-900);
+  font-family: 'Outfit', sans-serif;
 }
+
 .form-card .subtitle {
   color: var(--text-secondary);
-  margin-bottom: 32px;
-  font-size: 0.95rem;
+  margin-bottom: 36px;
+  font-size: 0.97rem;
+  line-height: 1.6;
 }
+
 .form-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 20px;
+  gap: 24px;
 }
+
+/* ===== FORM GROUPS ===== */
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 7px;
 }
+
 .form-group.full-width { grid-column: 1 / -1; }
+
 .form-group label {
   font-size: 0.875rem;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--gray-700);
+  letter-spacing: 0.01em;
 }
+
 .form-group label .required {
   color: var(--accent);
   margin-left: 2px;
 }
+
+/* ===== FORM CONTROLS ===== */
 .form-control {
-  padding: 11px 14px;
+  padding: 13px 16px;
   border: 1.5px solid var(--border-color);
   border-radius: var(--radius-sm);
   font-size: 0.938rem;
+  font-family: 'Inter', sans-serif;
   color: var(--text-primary);
   background: var(--bg-primary);
   transition: all var(--transition-fast);
   outline: none;
   width: 100%;
-}
-.form-control:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(220,38,38,0.1);
-}
-.form-control::placeholder { color: var(--gray-400); }
-select.form-control {
-  appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b7280' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 14px center;
-  padding-right: 36px;
+  box-sizing: border-box;
 }
 
+.form-control:hover {
+  border-color: var(--gray-300);
+}
+
+.form-control:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+  background: #fff;
+}
+
+.form-control::placeholder {
+  color: var(--gray-400);
+  font-size: 0.9rem;
+}
+
+.form-control:disabled {
+  background: var(--gray-50);
+  color: var(--gray-400);
+  cursor: not-allowed;
+}
+
+/* Select Dropdown */
+select.form-control {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 12 12'%3E%3Cpath fill='%236b7280' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 16px center;
+  padding-right: 42px;
+  cursor: pointer;
+}
+
+/* Date Input */
+input[type="date"].form-control {
+  cursor: pointer;
+}
+
+/* ===== SIGNUP / LOGIN MODAL ===== */
+.modal-overlay {
+  overflow-y: auto;
+}
+
+/* Auth modal scrollable inner container */
+.modal {
+  max-height: 92vh;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--red-200) transparent;
+}
+
+.modal::-webkit-scrollbar {
+  width: 5px;
+}
+
+.modal::-webkit-scrollbar-thumb {
+  background: var(--red-200);
+  border-radius: 10px;
+}
+
+/* ===== ROLE SELECTOR IN AUTH MODAL ===== */
 .login-role-selector {
   display: flex;
   background: var(--gray-100);
   border-radius: var(--radius-sm);
   padding: 4px;
   gap: 4px;
+  margin-bottom: 20px;
 }
+
 .login-role-btn {
   flex: 1;
-  padding: 8px 12px;
+  padding: 9px 12px;
   border-radius: calc(var(--radius-sm) - 2px);
   border: none;
   background: transparent;
@@ -84,13 +163,21 @@ select.form-control {
   align-items: center;
   justify-content: center;
   gap: 6px;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
 }
+
+.login-role-btn:hover {
+  color: var(--accent);
+}
+
 .login-role-btn.active {
   background: #fff;
   color: var(--accent);
   box-shadow: var(--shadow-sm);
 }
 
+/* ===== DONATION ELIGIBILITY BADGE ===== */
 .donation-warning {
   background: #fffbeb;
   border: 1px solid #fde68a;
@@ -99,13 +186,131 @@ select.form-control {
   font-size: 0.875rem;
   color: #92400e;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 8px;
-  margin-top: 4px;
+  margin-top: 6px;
   animation: fadeIn 0.3s ease;
+  line-height: 1.5;
 }
+
 .donation-warning.ok {
   background: #ecfdf5;
   border-color: #a7f3d0;
   color: #065f46;
+}
+
+/* ===== REGISTRATION PAGE STATS STRIP ===== */
+.reg-info-strip {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 36px;
+  flex-wrap: wrap;
+}
+
+.reg-info-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--gray-50);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 12px 18px;
+  flex: 1;
+  min-width: 140px;
+}
+
+.reg-info-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.reg-info-icon.red { background: var(--red-50); color: var(--red-600); }
+.reg-info-icon.green { background: #ecfdf5; color: #10b981; }
+.reg-info-icon.blue { background: var(--blue-50); color: var(--blue-500); }
+
+.reg-info-text .label {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.reg-info-text .value {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--gray-900);
+  font-family: 'Outfit', sans-serif;
+}
+
+/* ===== SEARCH BAR FOR FIND DONORS ===== */
+.search-bar {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  margin-bottom: 28px;
+  box-shadow: var(--shadow-sm);
+  align-items: flex-end;
+}
+
+.search-bar .form-control {
+  flex: 1;
+  min-width: 160px;
+}
+
+/* ===== FORM SUBMIT AREA ===== */
+.form-submit-area {
+  margin-top: 36px;
+  padding-top: 28px;
+  border-top: 1px solid var(--border-color);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+.form-submit-area .btn {
+  width: 100%;
+  max-width: 420px;
+  padding: 15px 36px;
+  font-size: 1.05rem;
+  letter-spacing: 0.02em;
+}
+
+.form-submit-note {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ===== VALIDATION STATE STYLES ===== */
+.form-control.is-error {
+  border-color: var(--critical);
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+.form-control.is-success {
+  border-color: #10b981;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+.form-error-text {
+  font-size: 0.78rem;
+  color: var(--critical);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
