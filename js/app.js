@@ -244,6 +244,15 @@ function animateDashboardBars() {
 document.addEventListener('DOMContentLoaded', () => {
   initFirebaseBackend();
 
+  // Bind nav link clicks using data-page attribute
+  document.querySelectorAll('.nav a[data-page]').forEach(link => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      const page = link.getAttribute('data-page');
+      if (page) navigateTo(page);
+    });
+  });
+
   // Route from hash or default to home
   const initialHash = window.location.hash.replace('#', '');
   if (initialHash) {
@@ -260,7 +269,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Handle hash changes
+  // Handle hash changes (browser back/forward)
   window.addEventListener('hashchange', () => {
     const pageId = window.location.hash.replace('#', '');
     if (pageId && pageId !== currentPage) {
