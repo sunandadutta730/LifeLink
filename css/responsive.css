@@ -61,6 +61,7 @@
   .compat-main-grid { grid-template-columns: 1fr; gap: 32px; }
   .bank-grid { grid-template-columns: 1fr; }
   .awareness-grid { grid-template-columns: 1fr; }
+  .awareness-grid-3col { grid-template-columns: 1fr; gap: 24px; }
   .urgency-selector { flex-direction: column; }
   .footer-grid { grid-template-columns: 1fr; gap: 28px; }
   .page-header h1 { font-size: 1.9rem; }

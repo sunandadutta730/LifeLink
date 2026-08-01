@@ -479,3 +479,94 @@
   color: #ffffff !important;
   border-color: var(--accent) !important;
 }
+
+/* ===== AWARENESS PAGE REDESIGN ===== */
+.awareness-grid-3col {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 28px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.awareness-card-new {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 32px 28px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03), 0 1px 3px rgba(0, 0, 0, 0.02);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.awareness-card-new:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.06), 0 4px 8px rgba(0, 0, 0, 0.03);
+}
+
+.awareness-card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.awareness-card-header h3 {
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.18rem;
+  font-weight: 800;
+  color: #111827;
+  margin: 0;
+}
+
+.awareness-card-icon {
+  font-size: 1.4rem;
+  line-height: 1;
+}
+
+.awareness-card-icon-box {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.awareness-card-icon-box.green {
+  background: #10b981;
+}
+
+.awareness-card-icon-box.red {
+  background: #fef2f2;
+}
+
+.awareness-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.awareness-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 0.92rem;
+  color: #4b5563;
+  line-height: 1.55;
+  font-weight: 500;
+}
+
+.awareness-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: #f87171;
+  flex-shrink: 0;
+  margin-top: 8px;
+}

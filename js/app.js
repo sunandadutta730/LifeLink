@@ -104,63 +104,123 @@ function renderHome() {
 // Awareness Page Renderer
 function renderAwareness() {
   return `
-    <div class="page-header">
+    <div class="page-header" style="text-align: center; padding-top: calc(var(--header-height) + 40px); padding-bottom: 20px; background: transparent;">
       <div class="container">
-        <h1>Blood Donation Awareness</h1>
-        <p>Essential facts, eligibility guidelines, and life-saving benefits of regular voluntary blood donation.</p>
+        <h1 style="font-size: 2.5rem; font-weight: 800; color: #111827; margin-bottom: 8px; font-family: 'Outfit', sans-serif;">
+          Blood Donation <span style="color: #dc2626;">Awareness</span>
+        </h1>
+        <p style="font-size: 1.05rem; color: #6b7280; margin: 0;">
+          Learn everything about blood donation and why it matters.
+        </p>
       </div>
     </div>
 
-    <section class="section">
+    <section class="section" style="padding-top: 20px; padding-bottom: 60px;">
       <div class="container">
-        <div class="awareness-grid">
-          <div class="awareness-card glow-card animate-on-scroll">
-            <h3>${SVG_ICONS.check(24, 'var(--success)')} Who Can Donate?</h3>
-            <ul>
-              <li>Age between 18 and 65 years</li>
-              <li>Weight at least 45 kg (99 lbs)</li>
-              <li>Hemoglobin level minimum 12.5 g/dL</li>
-              <li>Good general health with normal blood pressure</li>
+        <div class="awareness-grid-3col">
+          <!-- Card 1: Benefits -->
+          <div class="awareness-card-new animate-on-scroll">
+            <div class="awareness-card-header">
+              <span class="awareness-card-icon">💪</span>
+              <h3>Benefits of Blood Donation</h3>
+            </div>
+            <ul class="awareness-list">
+              <li>
+                <span class="awareness-dot"></span>
+                <span>Saves up to 3 lives with a single donation</span>
+              </li>
+              <li>
+                <span class="awareness-dot"></span>
+                <span>Free health screening before every donation</span>
+              </li>
+              <li>
+                <span class="awareness-dot"></span>
+                <span>Reduces risk of heart disease and cancer</span>
+              </li>
+              <li>
+                <span class="awareness-dot"></span>
+                <span>Stimulates production of new blood cells</span>
+              </li>
+              <li>
+                <span class="awareness-dot"></span>
+                <span>Burns approximately 650 calories per donation</span>
+              </li>
+              <li>
+                <span class="awareness-dot"></span>
+                <span>Gives a sense of purpose and community service</span>
+              </li>
             </ul>
           </div>
 
-          <div class="awareness-card glow-card animate-on-scroll">
-            <h3>${SVG_ICONS.cross(24, 'var(--critical)')} Temporary Deferrals</h3>
-            <ul>
-              <li>Alcohol consumption within 24 hours</li>
-              <li>Tattoo or piercing in the last 6 months</li>
-              <li>Recent surgery or major dental treatment</li>
-              <li>Current antibiotics or active infection</li>
+          <!-- Card 2: Who Can Donate -->
+          <div class="awareness-card-new animate-on-scroll">
+            <div class="awareness-card-header">
+              <span class="awareness-card-icon-box green">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              </span>
+              <h3>Who Can Donate Blood</h3>
+            </div>
+            <ul class="awareness-list">
+              <li>
+                <span class="awareness-dot"></span>
+                <span>Age between 18 to 65 years</span>
+              </li>
+              <li>
+                <span class="awareness-dot"></span>
+                <span>Minimum weight of 50 kg (110 lbs)</span>
+              </li>
+              <li>
+                <span class="awareness-dot"></span>
+                <span>Hemoglobin level at least 12.5 g/dL</span>
+              </li>
+              <li>
+                <span class="awareness-dot"></span>
+                <span>No chronic illnesses or infections</span>
+              </li>
+              <li>
+                <span class="awareness-dot"></span>
+                <span>Have not donated in the last 3 months</span>
+              </li>
+              <li>
+                <span class="awareness-dot"></span>
+                <span>In good general health on donation day</span>
+              </li>
             </ul>
           </div>
 
-          <div class="awareness-card glow-card animate-on-scroll">
-            <h3>${SVG_ICONS.sparkles(24, 'var(--blue-500)')} Health Benefits</h3>
-            <ul>
-              <li>Stimulates fresh red blood cell production</li>
-              <li>Reduces harmful iron buildup in the body</li>
-              <li>Free mini health checkup (BP, Hb, Pulse)</li>
-              <li>Lowers risk of cardiovascular diseases</li>
-            </ul>
-          </div>
-
-          <div class="awareness-card glow-card animate-on-scroll">
-            <h3>${SVG_ICONS.droplet(24, 'var(--accent)')} Before Donation</h3>
-            <ul>
-              <li>Drink plenty of water (500ml) before donating</li>
-              <li>Eat a healthy meal 2-3 hours prior</li>
-              <li>Get a good night's sleep (at least 7 hours)</li>
-              <li>Avoid heavy weightlifting on donation day</li>
-            </ul>
-          </div>
-
-          <div class="awareness-card glow-card animate-on-scroll">
-            <h3>${SVG_ICONS.heart(24, 'var(--accent)')} After Donation</h3>
-            <ul>
-              <li>Rest for 10-15 minutes at the donation center</li>
-              <li>Enjoy snacks and juice provided by medical staff</li>
-              <li>Keep the bandage on for at least 4 hours</li>
-              <li>Avoid smoking or alcohol for at least 6 hours</li>
+          <!-- Card 3: Who Cannot Donate -->
+          <div class="awareness-card-new animate-on-scroll">
+            <div class="awareness-card-header">
+              <span class="awareness-card-icon-box red">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </span>
+              <h3>Who Cannot Donate Blood</h3>
+            </div>
+            <ul class="awareness-list">
+              <li>
+                <span class="awareness-dot"></span>
+                <span>Individuals with HIV, Hepatitis B/C</span>
+              </li>
+              <li>
+                <span class="awareness-dot"></span>
+                <span>Pregnant or breastfeeding women</span>
+              </li>
+              <li>
+                <span class="awareness-dot"></span>
+                <span>People with heart, kidney, or liver disease</span>
+              </li>
+              <li>
+                <span class="awareness-dot"></span>
+                <span>Those on certain medications (anticoagulants)</span>
+              </li>
+              <li>
+                <span class="awareness-dot"></span>
+                <span>People with recent tattoos or piercings (6 months)</span>
+              </li>
+              <li>
+                <span class="awareness-dot"></span>
+                <span>Individuals under the influence of alcohol</span>
+              </li>
             </ul>
           </div>
         </div>
