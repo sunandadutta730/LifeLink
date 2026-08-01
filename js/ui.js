@@ -83,6 +83,7 @@ function renderPage() {
     initScrollReveal();
     if (currentPage === 'find') filterDonors();
     if (currentPage === 'dashboard') animateDashboardBars();
+    if (currentPage === 'compatibility') updateCompatibilityView();
   });
 }
 

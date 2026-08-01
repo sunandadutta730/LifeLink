@@ -8,7 +8,7 @@ const COMPATIBILITY = {
   'A-': { donateTo: ['A-', 'A+', 'AB-', 'AB+'], receiveFrom: ['O-', 'A-'], label: 'Rare Type' },
   'A+': { donateTo: ['A+', 'AB+'], receiveFrom: ['O-', 'O+', 'A-', 'A+'], label: 'Common Type' },
   'B-': { donateTo: ['B-', 'B+', 'AB-', 'AB+'], receiveFrom: ['O-', 'B-'], label: 'Rare Type' },
-  'B+': { donateTo: ['B+', 'AB+'], receiveFrom: ['O-', 'O+'], label: 'Common Type' },
+  'B+': { donateTo: ['B+', 'AB+'], receiveFrom: ['O-', 'O+', 'B-', 'B+'], label: 'Common Type' },
   'AB-': { donateTo: ['AB-', 'AB+'], receiveFrom: ['O-', 'A-', 'B-', 'AB-'], label: 'Rarest Type' },
   'AB+': { donateTo: ['AB+'], receiveFrom: ['O-', 'O+', 'A-', 'A+', 'B-', 'B+', 'AB-', 'AB+'], label: 'Universal Receiver' }
 };

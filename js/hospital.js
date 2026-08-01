@@ -53,25 +53,15 @@ function renderCompatibility() {
 
     <section class="section">
       <div class="container">
-        <div class="compatibility-tool form-card animate-on-scroll">
+        <div class="compat-container animate-on-scroll">
           <div class="compat-select-row">
-            <label>Select Blood Group:</label>
-            <select id="compat-type" class="form-control" style="max-width: 220px;" onchange="updateCompatibilityView()">
-              ${BLOOD_GROUPS.map(g => `<option value="${g}">${g} (${COMPATIBILITY[g].label})</option>`).join('')}
+            <label for="compat-type">Select your blood group:</label>
+            <select id="compat-type" class="compat-select" onchange="updateCompatibilityView()">
+              ${BLOOD_GROUPS.map(g => `<option value="${g}" ${g === 'B+' ? 'selected' : ''}>${g}</option>`).join('')}
             </select>
           </div>
 
           <div id="compat-result-view"></div>
-        </div>
-
-        <div class="rare-section animate-on-scroll">
-          <h3>${SVG_ICONS.sparkles(24, 'var(--red-600)')} Universal & Rare Donors Priority</h3>
-          <p>O- is the universal red blood cell donor type (can donate to all groups). AB+ is the universal plasma donor.</p>
-          <div class="rare-badges">
-            <span class="rare-badge">O- (Universal)</span>
-            <span class="rare-badge">AB- (Rarest)</span>
-            <span class="rare-badge">B- (High Demand)</span>
-          </div>
         </div>
       </div>
     </section>
@@ -83,39 +73,51 @@ function updateCompatibilityView() {
   const container = document.getElementById('compat-result-view');
   if (!typeSelect || !container) return;
 
-  const selectedGroup = typeSelect.value || 'O-';
-  const info = COMPATIBILITY[selectedGroup];
+  const selectedGroup = typeSelect.value || 'B+';
+  const info = COMPATIBILITY[selectedGroup] || COMPATIBILITY['B+'];
 
   container.innerHTML = `
-    <div class="compat-result active">
-      <div style="text-align: center; margin-bottom: 32px;">
-        <span class="blood-badge" style="font-size: 2rem; padding: 8px 24px;">${selectedGroup}</span>
-        <h3 style="font-size: 1.25rem; font-weight: 700; margin-top: 12px; color: var(--accent);">${info.label}</h3>
+    <div class="compat-hero-section">
+      <div class="compat-hero-type">${selectedGroup}</div>
+      <div class="compat-hero-label">${info.label}</div>
+    </div>
+
+    <div class="compat-main-grid">
+      <!-- Donate To Column -->
+      <div class="compat-column">
+        <div class="compat-col-header">
+          <h3 class="compat-col-title">🩸 ${selectedGroup} Can Donate To</h3>
+          <p class="compat-col-subtitle">These blood types can receive from ${selectedGroup}</p>
+        </div>
+        <div class="compat-grid-2col">
+          ${BLOOD_GROUPS.map(g => {
+            const isMatch = info.donateTo.includes(g);
+            return `
+              <div class="compat-card ${isMatch ? 'compatible' : 'not-compatible'}">
+                <div class="compat-card-type">${g}</div>
+                <div class="compat-card-status">${isMatch ? '✓ COMPATIBLE' : '✕ NO'}</div>
+              </div>
+            `;
+          }).join('')}
+        </div>
       </div>
 
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 32px;">
-        <div>
-          <h4 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 16px; color: var(--gray-800); text-align: center;">
-            Can CAN DONATE TO:
-          </h4>
-          <div class="compat-grid">
-            ${BLOOD_GROUPS.map(g => {
-              const can = info.donateTo.includes(g);
-              return `<div class="compat-item ${can ? 'can-donate' : 'cannot'}">${g}<span class="compat-label">${can ? 'MATCH' : 'NO'}</span></div>`;
-            }).join('')}
-          </div>
+      <!-- Receive From Column -->
+      <div class="compat-column">
+        <div class="compat-col-header">
+          <h3 class="compat-col-title">💉 ${selectedGroup} Can Receive From</h3>
+          <p class="compat-col-subtitle">These blood types can donate to ${selectedGroup}</p>
         </div>
-
-        <div>
-          <h4 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 16px; color: var(--gray-800); text-align: center;">
-            Can RECEIVE FROM:
-          </h4>
-          <div class="compat-grid">
-            ${BLOOD_GROUPS.map(g => {
-              const can = info.receiveFrom.includes(g);
-              return `<div class="compat-item ${can ? 'can-donate' : 'cannot'}">${g}<span class="compat-label">${can ? 'MATCH' : 'NO'}</span></div>`;
-            }).join('')}
-          </div>
+        <div class="compat-grid-2col">
+          ${BLOOD_GROUPS.map(g => {
+            const isMatch = info.receiveFrom.includes(g);
+            return `
+              <div class="compat-card ${isMatch ? 'compatible' : 'not-compatible'}">
+                <div class="compat-card-type">${g}</div>
+                <div class="compat-card-status">${isMatch ? '✓ COMPATIBLE' : '✕ NO'}</div>
+              </div>
+            `;
+          }).join('')}
         </div>
       </div>
     </div>

@@ -106,46 +106,132 @@
 .donor-status.unavailable .donor-status-dot { background: var(--gray-400); }
 
 /* Compatibility Checker */
-.compatibility-tool { max-width: 900px; margin: 0 auto; }
+.compat-container { max-width: 900px; margin: 0 auto; }
 .compat-select-row {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 12px;
   justify-content: center;
-  margin-bottom: 48px;
+  margin-bottom: 32px;
   flex-wrap: wrap;
 }
-.compat-select-row label { font-weight: 700; font-size: 1.05rem; }
-.compat-select-row select {
-  padding: 12px 40px 12px 16px;
-  font-size: 1.05rem;
-  font-weight: 600;
-  border-radius: var(--radius-sm);
-  border: 2px solid var(--accent);
+.compat-select-row label { font-weight: 700; font-size: 1rem; color: var(--gray-800); }
+.compat-select {
+  padding: 8px 36px 8px 16px;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #b91c1c;
+  border: 1.5px solid #ef4444;
+  border-radius: 8px;
+  background-color: #fff;
+  cursor: pointer;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b7280' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
 }
-.compat-result { display: none; animation: fadeInUp 0.5s ease; }
-.compat-result.active { display: block; }
-.compat-direction { text-align: center; margin-bottom: 32px; }
-.compat-direction h3 { font-size: 1.5rem; font-weight: 700; margin-bottom: 8px; }
-.compat-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-  gap: 16px;
-  max-width: 600px;
-  margin: 0 auto;
-}
-.compat-item {
-  padding: 20px;
-  border-radius: var(--radius-md);
+.compat-select:focus { box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15); }
+
+.compat-hero-section {
   text-align: center;
+  margin-bottom: 36px;
+}
+.compat-hero-type {
+  font-family: 'Outfit', sans-serif;
+  font-size: 3.8rem;
+  font-weight: 900;
+  color: #dc2626;
+  line-height: 1;
+  margin-bottom: 6px;
+}
+.compat-hero-label {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--gray-600);
+}
+
+.compat-main-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 36px;
+}
+
+.compat-col-header {
+  text-align: center;
+  margin-bottom: 24px;
+}
+.compat-col-title {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--gray-900);
+  margin-bottom: 4px;
+  font-family: 'Outfit', sans-serif;
+}
+.compat-col-subtitle {
+  font-size: 0.85rem;
+  color: var(--gray-500);
+  margin: 0;
+}
+
+.compat-grid-2col {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+}
+
+.compat-card {
+  border-radius: 12px;
+  padding: 18px 12px;
+  text-align: center;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 84px;
+}
+
+.compat-card.compatible {
+  background-color: #ecfdf5;
+  border: 1.5px solid #a7f3d0;
+}
+
+.compat-card.not-compatible {
+  background-color: #f1f5f9;
+  border: 1.5px solid #e2e8f0;
+}
+
+.compat-card-type {
   font-family: 'Outfit', sans-serif;
   font-size: 1.5rem;
   font-weight: 800;
-  transition: all var(--transition-base);
+  line-height: 1.2;
+  margin-bottom: 4px;
 }
-.compat-item.can-donate { background: #ecfdf5; color: #065f46; border: 2px solid #a7f3d0; }
-.compat-item.cannot { background: var(--gray-100); color: var(--gray-400); border: 2px solid var(--gray-200); }
-.compat-item:hover { transform: scale(1.05); }
+
+.compat-card.compatible .compat-card-type {
+  color: #047857;
+}
+
+.compat-card.not-compatible .compat-card-type {
+  color: #94a3b8;
+}
+
+.compat-card-status {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.compat-card.compatible .compat-card-status {
+  color: #047857;
+}
+
+.compat-card.not-compatible .compat-card-status {
+  color: #94a3b8;
+}
 
 /* Blood Banks */
 .bank-grid {

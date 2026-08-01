@@ -58,7 +58,7 @@
   .crisis-visual { grid-template-columns: repeat(2, 1fr); }
   .search-bar { flex-direction: column; }
   .donor-results { grid-template-columns: 1fr; }
-  .compat-grid { grid-template-columns: repeat(2, 1fr); }
+  .compat-main-grid { grid-template-columns: 1fr; gap: 32px; }
   .bank-grid { grid-template-columns: 1fr; }
   .awareness-grid { grid-template-columns: 1fr; }
   .urgency-selector { flex-direction: column; }
