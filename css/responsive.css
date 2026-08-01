@@ -27,7 +27,7 @@
   .crisis-content { grid-template-columns: 1fr; gap: 32px; }
   .features-grid { grid-template-columns: 1fr; }
   .dashboard-grid { grid-template-columns: 1fr; }
-  .footer-grid { grid-template-columns: 1fr 1fr; }
+  .footer-grid { grid-template-columns: 1fr 1fr; gap: 32px; }
   .lp-stats-row { grid-template-columns: repeat(2, 1fr); }
   .awareness-grid { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
   .awareness-card, .awareness-card:nth-child(4), .awareness-card:nth-child(5) { grid-column: auto !important; }
@@ -62,7 +62,7 @@
   .bank-grid { grid-template-columns: 1fr; }
   .awareness-grid { grid-template-columns: 1fr; }
   .urgency-selector { flex-direction: column; }
-  .footer-grid { grid-template-columns: 1fr; gap: 24px; }
+  .footer-grid { grid-template-columns: 1fr; gap: 28px; }
   .page-header h1 { font-size: 1.9rem; }
   .toast { min-width: auto; max-width: calc(100vw - 48px); }
   .lp-hero { padding-top: calc(var(--header-height) + 32px); }
