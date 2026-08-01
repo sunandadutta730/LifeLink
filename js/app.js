@@ -305,60 +305,116 @@ function renderAwareness() {
 
 // Dashboard Page Renderer
 function renderDashboard() {
+  const totalRequests = Object.values(DASHBOARD_DATA.requests).reduce((a, b) => a + b, 0);
+
+  // Build bar chart with color coding matching the reference image
+  const barColors = {
+    'O+': 'db-bar-red', 'A+': 'db-bar-red',
+    'B+': 'db-bar-blue', 'O-': 'db-bar-blue',
+    'AB+': 'db-bar-green', 'A-': 'db-bar-amber',
+    'B-': 'db-bar-amber', 'AB-': 'db-bar-amber'
+  };
+
   return `
-    <div class="page-header">
+    <!-- Dashboard Header -->
+    <div class="db-page-header">
       <div class="container">
-        <h1>Network Dashboard & Analytics</h1>
-        <p>Real-time analytics on blood demand, regional donor density, and active emergency alerts.</p>
+        <h1 class="db-title">Data Analytics <span>Dashboard</span></h1>
+        <p class="db-subtitle">Real-time insights on blood demand trends and shortage alerts.</p>
       </div>
     </div>
 
-    <section class="section">
+    <section class="section" style="padding-top: 20px; padding-bottom: 60px;">
       <div class="container">
-        <div class="dashboard-grid">
-          <div>
-            <div class="chart-card animate-on-scroll">
-              <h3>Demand by Blood Group (Active Requests)</h3>
-              <div class="bar-chart">
-                ${Object.entries(DASHBOARD_DATA.requests).map(([group, val]) => `
-                  <div class="bar-item">
-                    <span class="bar-label">${group}</span>
-                    <div class="bar-track">
-                      <div class="bar-fill ${RARE_GROUPS.includes(group) ? 'red' : 'blue'}" data-width="${val}%">
-                        ${val}%
+        <div class="db-main-grid">
+
+          <!-- LEFT COLUMN -->
+          <div class="db-left-col">
+            <!-- Bar Chart Card -->
+            <div class="db-card animate-on-scroll">
+              <div class="db-card-header">
+                <span class="db-card-icon">🩸</span>
+                <h3>Blood Groups Most Requested This Month</h3>
+              </div>
+              <div class="db-bar-chart">
+                ${Object.entries(DASHBOARD_DATA.requests)
+                  .sort((a, b) => b[1] - a[1])
+                  .map(([group, val]) => {
+                    const pct = Math.round((val / 86) * 100);
+                    const cls = barColors[group] || 'db-bar-blue';
+                    return `
+                      <div class="db-bar-row">
+                        <span class="db-bar-label">${group}</span>
+                        <div class="db-bar-track">
+                          <div class="db-bar-fill ${cls}" data-width="${pct}%">
+                            <span class="db-bar-text">${val} requests</span>
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  </div>
-                `).join('')}
-              </div>
-            </div>
-          </div>
-
-          <div>
-            <div class="chart-card animate-on-scroll" style="margin-bottom: 24px;">
-              <h3>Top Regional Donor Density</h3>
-              <div class="region-list">
-                ${DASHBOARD_DATA.regions.map(r => `
-                  <div class="region-item">
-                    <span class="region-name">${r.name}</span>
-                    <span class="region-count">${r.count} Donors</span>
-                  </div>
-                `).join('')}
+                    `;
+                  }).join('')}
               </div>
             </div>
 
-            <div class="chart-card animate-on-scroll">
-              <h3>Network Shortage Alerts</h3>
-              <div class="alert-list">
+            <!-- Alerts Card -->
+            <div class="db-card db-card-alerts animate-on-scroll" style="margin-top: 24px;">
+              <div class="db-card-header">
+                <span class="db-card-icon-box amber">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                </span>
+                <h3>Rare Blood Shortage Alerts</h3>
+              </div>
+              <div class="db-alerts-list">
                 ${DASHBOARD_DATA.alerts.map(a => `
-                  <div class="alert-item ${a.type}">
-                    <div class="alert-icon">${SVG_ICONS.siren(16, a.type === 'critical' ? 'var(--critical)' : '#d97706')}</div>
-                    <span>${a.text}</span>
+                  <div class="db-alert-item db-alert-${a.type}">
+                    <span class="db-alert-dot db-dot-${a.type}"></span>
+                    <span class="db-alert-text">${a.text}</span>
                   </div>
                 `).join('')}
               </div>
             </div>
           </div>
+
+          <!-- RIGHT COLUMN -->
+          <div class="db-right-col">
+            <!-- Regions Card -->
+            <div class="db-card animate-on-scroll">
+              <div class="db-card-header">
+                <span class="db-card-icon">📍</span>
+                <h3>Regions with Highest Demand</h3>
+              </div>
+              <div class="db-regions-list">
+                ${DASHBOARD_DATA.regions.map((r, i) => `
+                  <div class="db-region-row">
+                    <div class="db-region-rank">#${i + 1}</div>
+                    <div class="db-region-name">${r.name}</div>
+                    <div class="db-region-count">${r.count}</div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+
+            <!-- Quick Stats -->
+            <div class="db-quick-stats animate-on-scroll" style="margin-top: 24px;">
+              <div class="db-card-header" style="padding: 0 0 16px 0;">
+                <span class="db-card-icon">📊</span>
+                <h3>Quick Stats</h3>
+              </div>
+              <div class="db-stat-pill db-stat-red">
+                <div class="db-stat-num">${totalRequests}</div>
+                <div class="db-stat-lbl">Total requests this month</div>
+              </div>
+              <div class="db-stat-pill db-stat-green">
+                <div class="db-stat-num">89%</div>
+                <div class="db-stat-lbl">Request fulfillment rate</div>
+              </div>
+              <div class="db-stat-pill db-stat-blue">
+                <div class="db-stat-num">28 min</div>
+                <div class="db-stat-lbl">Avg. response time</div>
+              </div>
+            </div>
+          </div>
+
         </div>
       </div>
     </section>
@@ -366,7 +422,7 @@ function renderDashboard() {
 }
 
 function animateDashboardBars() {
-  document.querySelectorAll('.bar-fill').forEach(bar => {
+  document.querySelectorAll('.bar-fill, .db-bar-fill').forEach(bar => {
     const targetWidth = bar.dataset.width;
     setTimeout(() => {
       bar.style.width = targetWidth;
