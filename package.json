@@ -1,0 +1,21 @@
+{
+  "name": "lifelink",
+  "version": "1.0.0",
+  "description": "Smart Blood Donor Network & Emergency Dispatch Platform",
+  "main": "index.html",
+  "scripts": {
+    "start": "python -m http.server 8080"
+  },
+  "keywords": [
+    "blood-donor",
+    "emergency-blood",
+    "firebase",
+    "healthcare",
+    "lifelink"
+  ],
+  "author": "LifeLink Team",
+  "license": "MIT",
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  }
+}

@@ -1,21 +1,28 @@
 # ===== LifeLink .gitignore =====
 
-# Seed script — local use only (has hardcoded keys for local Firestore seeding)
+# Firebase configuration with sensitive API key override
+config/firebase-config.js
+firebase-config.js
+
+# Seed script with local API keys
 seed.js
 
-# Note: Firebase config is now embedded inline in index.html (no firebase-config.js needed)
-
-# Node modules (if any)
+# Dependencies
 node_modules/
+package-lock.json
 
-# OS files
+# Environment overrides
+.env
+.env.local
+
+# OS system files
 .DS_Store
 Thumbs.db
 
-# Editor directories
+# IDE & Editor directories
 .vscode/
 .idea/
 
-# Temporary files
+# Temporary files & logs
 *.log
 *.tmp

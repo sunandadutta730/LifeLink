@@ -10,7 +10,7 @@
   <meta property="og:description" content="Connecting donors and saving lives. Find blood donors, register as a donor, or submit emergency requests.">
   <meta property="og:type" content="website">
   <title>LifeLink – Smart Blood Donor Network</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="css/style.css">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23dc2626'><path d='M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z'/></svg>">
 </head>
 <body>
@@ -35,7 +35,7 @@
         <a href="#" data-page="dashboard">Dashboard</a>
       </nav>
       <div class="header-auth-action" id="header-auth-container">
-        <button class="btn btn-outline btn-sm nav-login-btn" onclick="openLoginModal()">
+        <button class="btn btn-outline btn-sm nav-login-btn" onclick="openAuthModal('signup', 'user')">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
           Login
         </button>
@@ -94,7 +94,7 @@
         </div>
       </div>
       <div class="footer-bottom">
-        <p>&copy; 2026 LifeLink – Riddhika Ghosh</p>
+        <p>&copy; 2026 LifeLink – Smart Blood Donor Network</p>
       </div>
     </div>
   </footer>
@@ -104,25 +104,27 @@
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
 
-  <!-- Firebase Config — embedded inline for GitHub Pages deployment -->
-  <!-- ⚠️  IMPORTANT: After rotating your API key in Google Cloud Console,
-       paste your NEW Firebase config values below.
-       Firebase web API keys are safe to include here when restricted by domain in Google Cloud Console.
-       Real security comes from Firebase Security Rules, not hiding this key. -->
-  <script>
-    // ===== FIREBASE CONFIGURATION =====
-    // Get these values from: https://console.firebase.google.com → Your Project → Project Settings → Web Apps
-    // IMPORTANT: Replace with your NEW API key after revoking the leaked one!
-    window.firebaseConfig = {
-      apiKey: "YOUR_NEW_API_KEY_HERE",
-      authDomain: "lifelink-1a1e8.firebaseapp.com",
-      projectId: "lifelink-1a1e8",
-      storageBucket: "lifelink-1a1e8.firebasestorage.app",
-      messagingSenderId: "475258635754",
-      appId: "1:475258635754:web:279e47401fb5ccb5a35e93"
-    };
-  </script>
+  <!-- System Configuration & Firebase Config -->
+  <script src="config/constants.js"></script>
+  <script src="config/firebase-config.js"></script>
 
-  <script src="app.js"></script>
+  <!-- Sample & Mock Data -->
+  <script src="data/sample-data/donors.js"></script>
+
+  <!-- Application Modules -->
+  <script src="js/utils.js"></script>
+  <script src="js/validation.js"></script>
+  <script src="js/notification.js"></script>
+  <script src="js/map.js"></script>
+  <script src="js/firebase.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/donor.js"></script>
+  <script src="js/receiver.js"></script>
+  <script src="js/hospital.js"></script>
+  <script src="js/admin.js"></script>
+
+  <!-- Core Application Entry Point -->
+  <script src="js/app.js"></script>
 </body>
 </html>

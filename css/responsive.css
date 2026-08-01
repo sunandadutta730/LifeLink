@@ -1,0 +1,77 @@
+/* ===== LifeLink Media Queries & Responsive Layouts ===== */
+
+@media (max-width: 1024px) {
+  .nav { display: none; }
+  .nav.open {
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255,255,255,0.98);
+    backdrop-filter: blur(20px);
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    z-index: 1000;
+  }
+  .nav.open a {
+    font-size: 1.1rem;
+    padding: 12px 24px;
+  }
+  .mobile-toggle { display: flex; }
+  .hero h1 { font-size: 2.5rem; }
+  .stats-grid { grid-template-columns: repeat(2, 1fr); margin-top: -20px; }
+  .crisis-content { grid-template-columns: 1fr; gap: 32px; }
+  .features-grid { grid-template-columns: 1fr; }
+  .dashboard-grid { grid-template-columns: 1fr; }
+  .footer-grid { grid-template-columns: 1fr 1fr; }
+  .lp-stats-row { grid-template-columns: repeat(2, 1fr); }
+  .awareness-grid { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+  .awareness-card, .awareness-card:nth-child(4), .awareness-card:nth-child(5) { grid-column: auto !important; }
+}
+
+@media (max-width: 860px) {
+  .lp-problem-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 768px) {
+  .container { padding: 0 16px; }
+  .section { padding: 56px 0; }
+  .hero { padding-top: calc(var(--header-height) + 40px); padding-bottom: 56px; }
+  .hero h1 { font-size: 2rem; }
+  .hero-subtitle { font-size: 1rem; }
+  .hero-buttons { flex-direction: column; width: 100%; }
+  .hero-buttons .btn { width: 100%; }
+  .section-header h2 { font-size: 1.75rem; }
+  .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .stat-card { padding: 20px; }
+  .stat-number { font-size: 1.75rem; }
+  .form-grid { grid-template-columns: 1fr; }
+  .form-card { padding: 24px; }
+  .crisis-stats { flex-direction: column; }
+  .crisis-visual { grid-template-columns: repeat(2, 1fr); }
+  .search-bar { flex-direction: column; }
+  .donor-results { grid-template-columns: 1fr; }
+  .compat-grid { grid-template-columns: repeat(2, 1fr); }
+  .bank-grid { grid-template-columns: 1fr; }
+  .awareness-grid { grid-template-columns: 1fr; }
+  .urgency-selector { flex-direction: column; }
+  .footer-grid { grid-template-columns: 1fr; gap: 24px; }
+  .page-header h1 { font-size: 1.9rem; }
+  .toast { min-width: auto; max-width: calc(100vw - 48px); }
+  .lp-hero { padding-top: calc(var(--header-height) + 32px); }
+  .lp-problem-section { padding-top: 72px; }
+  .lp-cta-banner { padding: 36px 26px; }
+}
+
+@media (max-width: 480px) {
+  .hero h1 { font-size: 1.7rem; }
+  .stats-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .stat-card { padding: 16px; }
+  .stat-number { font-size: 1.5rem; }
+  .blood-type-card { padding: 14px; }
+  .blood-type-label { font-size: 1.5rem; }
+}

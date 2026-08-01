@@ -39,7 +39,7 @@ Every year, thousands of critical medical emergencies — especially involving r
 | Layer | Technology Used | Badges |
 | :--- | :--- | :--- |
 | **Frontend Core** | HTML5 Semantic Architecture, Vanilla JavaScript (ES6+ Single Page Application) | <img src="https://img.shields.io/badge/HTML5-E34F26?style=flat-square&logo=html5&logoColor=white" /> <img src="https://img.shields.io/badge/JavaScript-F7DF1E?style=flat-square&logo=javascript&logoColor=black" /> |
-| **Styling & Motion** | Custom CSS3 Design System, Flexbox/Grid, Keyframe Animations | <img src="https://img.shields.io/badge/CSS3-1572B6?style=flat-square&logo=css3&logoColor=white" /> |
+| **Styling & Motion** | Custom CSS3 Modular Design System, Flexbox/Grid, Keyframe Animations | <img src="https://img.shields.io/badge/CSS3-1572B6?style=flat-square&logo=css3&logoColor=white" /> |
 | **Iconography** | Dynamic Inline High-Detail Vector SVG Icons Engine | <img src="https://img.shields.io/badge/SVG-000000?style=flat-square&logo=svg&logoColor=white" /> |
 | **Cloud Backend** | Google Firebase (App, Cloud Firestore DB, Realtime Auth API) | <img src="https://img.shields.io/badge/Firebase-FFCA28?style=flat-square&logo=firebase&logoColor=black" /> |
 | **Hosting & CI/CD** | GitHub Pages / Local HTTP Server | <img src="https://img.shields.io/badge/GitHub%20Pages-22272E?style=flat-square&logo=github&logoColor=white" /> |
@@ -50,13 +50,35 @@ Every year, thousands of critical medical emergencies — especially involving r
 
 ```mermaid
 graph TD
-    A[Public Web User / Patient] -->|Submit Emergency Request| B(LifeLink Web SPA - app.js)
+    A[Public Web User / Patient] -->|Submit Emergency Request| B(LifeLink Web SPA - js/app.js)
     C[Blood Donor] -->|Register Availability| B
     B -->|Bi-directional Sync| D[(Google Firebase Cloud Firestore)]
     D -->|Realtime Update broadcast| E[Admin Control Center]
     E -->|Manage Inventory & Donors| D
     D -->|Push Live Updates| A
 ```
+
+---
+
+## 📁 Clean & Scalable Directory Structure
+
+```
+LifeLink/
+├── assets/                  # Static assets (images, icons, logos, fonts, animations, videos)
+├── css/                     # Modular CSS (variables, components, forms, dashboard, responsive, style)
+├── js/                      # Modular JS (app, firebase, auth, donor, receiver, hospital, admin, map, ui, utils, validation)
+├── data/                    # Sample & mock data repositories (sample-data/donors.js)
+├── docs/                    # API, Database, Structure & Deployment Documentation
+├── config/                  # Configuration (constants.js, firebase-config.js)
+├── index.html               # Main SPA HTML entry shell
+├── README.md                # Project documentation & presentation guide
+├── LICENSE                  # MIT Open Source License
+├── .gitignore               # Excluded file list
+├── .env.example             # Environment template
+└── package.json             # NPM package manifest & scripts
+```
+
+Detailed architecture breakdown available in [docs/PROJECT_STRUCTURE.md](docs/PROJECT_STRUCTURE.md).
 
 ---
 
@@ -111,18 +133,6 @@ To host this repository live for free on GitHub Pages:
 
 ---
 
-## 📁 Repository Structure
-
-```
-LifeLink/
-├── index.html         # Main SPA HTML structure & Firebase CDN scripts
-├── style.css          # Design system tokens, glassmorphism & motion animations
-├── app.js             # Core SPA Router, SVG Icons Engine & Firebase Cloud Sync
-└── README.md          # Project Documentation & Hackathon Guide
-```
-
----
-
 ## 📄 License & Credits
 
 Designed & Developed with ❤️ by:
@@ -130,8 +140,5 @@ Designed & Developed with ❤️ by:
 * **Souham Dutta**
 * **Riddhika Ghosh**
 
-
-
-
 Built for the **Hackathon Competition**.  
-Licensed under the [MIT License](LICENSE)..
+Licensed under the [MIT License](LICENSE).
