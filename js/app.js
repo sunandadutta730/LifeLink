@@ -224,6 +224,80 @@ function renderAwareness() {
             </ul>
           </div>
         </div>
+
+        <!-- Second Row: 2 centered cards -->
+        <div class="awareness-grid-2col-centered">
+          <!-- Card 4: Common Myths Debunked -->
+          <div class="awareness-card-new animate-on-scroll">
+            <div class="awareness-card-header">
+              <span class="awareness-card-icon-box orange">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+              </span>
+              <h3>Common Myths Debunked</h3>
+            </div>
+            <ul class="awareness-list">
+              <li>
+                <span class="awareness-dot"></span>
+                <span><strong>Myth:</strong> Donating blood makes you weak → <em style="color:#dc2626;">You recover within 24–48 hours</em></span>
+              </li>
+              <li>
+                <span class="awareness-dot"></span>
+                <span><strong>Myth:</strong> You can get diseases from donating → <em style="color:#dc2626;">Sterile, single-use equipment is always used</em></span>
+              </li>
+              <li>
+                <span class="awareness-dot"></span>
+                <span><strong>Myth:</strong> Vegetarians can't donate → <em style="color:#dc2626;">Diet doesn't affect eligibility if you're healthy</em></span>
+              </li>
+              <li>
+                <span class="awareness-dot"></span>
+                <span><strong>Myth:</strong> It's very painful → <em style="color:#dc2626;">Only a small pinch, over in seconds</em></span>
+              </li>
+              <li>
+                <span class="awareness-dot"></span>
+                <span><strong>Myth:</strong> Blood donation takes hours → <em style="color:#dc2626;">The actual process takes only 8–10 minutes</em></span>
+              </li>
+            </ul>
+          </div>
+
+          <!-- Card 5: Safety of Blood Donation -->
+          <div class="awareness-card-new animate-on-scroll">
+            <div class="awareness-card-header">
+              <span class="awareness-card-icon">🛡️</span>
+              <h3>Safety of Blood Donation</h3>
+            </div>
+            <div class="awareness-safety-grid">
+              <ul class="awareness-list">
+                <li>
+                  <span class="awareness-dot"></span>
+                  <span>All equipment is sterile, single-use, and disposable</span>
+                </li>
+                <li>
+                  <span class="awareness-dot"></span>
+                  <span>Pre-donation health check ensures donor safety</span>
+                </li>
+                <li>
+                  <span class="awareness-dot"></span>
+                  <span>Donors are given refreshments and rest time post-donation</span>
+                </li>
+              </ul>
+              <ul class="awareness-list">
+                <li>
+                  <span class="awareness-dot"></span>
+                  <span>Trained medical staff supervise every step</span>
+                </li>
+                <li>
+                  <span class="awareness-dot"></span>
+                  <span>Blood is tested for infectious diseases before use</span>
+                </li>
+                <li>
+                  <span class="awareness-dot"></span>
+                  <span>Adverse reactions are extremely rare (less than 1%)</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
       </div>
     </section>
   `;
