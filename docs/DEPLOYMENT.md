@@ -24,7 +24,7 @@ window.firebaseConfig = {
   appId: "YOUR_APP_ID"
 };
 ```
-*(Note: If `config/firebase-config.js` is absent, the system automatically falls back to `DEFAULT_FIREBASE_CONFIG` in `config/constants.js` so the application runs seamlessly out of the box).*
+*(Note: The application uses `config/firebase-config.js` as the single source of truth for client-side Firebase initialization).*
 
 ### Step 3: Launch Local HTTP Server
 Using Python (pre-installed on Windows/macOS/Linux):
@@ -61,5 +61,5 @@ Open your browser and navigate to `http://localhost:8080`.
 
 To enable Google Sign-In on your live domain:
 1. Open [console.firebase.google.com](https://console.firebase.google.com).
-2. Select project `lifelink-1a1e8` ➔ **Authentication** ➔ **Settings** ➔ **Authorized Domains**.
+2. Select project `lifeline-2026` ➔ **Authentication** ➔ **Settings** ➔ **Authorized Domains**.
 3. Add your custom domain or `sunandadutta730.github.io` to the authorized domains list.

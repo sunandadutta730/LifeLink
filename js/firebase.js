@@ -7,8 +7,12 @@ function initFirebaseBackend() {
   if (typeof firebase !== 'undefined') {
     try {
       if (!firebase.apps.length) {
-        const config = window.firebaseConfig || DEFAULT_FIREBASE_CONFIG;
-        firebase.initializeApp(config);
+        const config = window.firebaseConfig;
+        if (config) {
+          firebase.initializeApp(config);
+        } else {
+          console.warn('Firebase configuration missing! Please ensure config/firebase-config.js is loaded.');
+        }
       }
       db = firebase.firestore();
 

@@ -76,3 +76,25 @@
   --transition-base: 250ms var(--ease-smooth);
   --transition-slow: 400ms var(--ease-smooth);
 }
+
+/* ===== DARK THEME TOKENS ===== */
+:root[data-theme="dark"],
+[data-theme="dark"] {
+  --bg-primary: #0f172a;
+  --bg-secondary: #1e293b;
+  --bg-muted: #334155;
+  --text-primary: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --text-muted: #94a3b8;
+  --border-color: #334155;
+  --accent: #ef4444;
+  --accent-hover: #dc2626;
+  --accent-light: rgba(239, 68, 68, 0.15);
+  --navy: #0b1329;
+
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.4);
+  --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.5);
+  --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.6);
+  --shadow-xl: 0 20px 25px -5px rgba(0,0,0,0.7);
+  --shadow-glow: 0 0 40px rgba(239, 68, 68, 0.25);
+}

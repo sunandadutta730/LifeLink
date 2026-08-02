@@ -169,3 +169,38 @@ function initScrollReveal() {
 
   document.querySelectorAll('.animate-on-scroll, .reveal-up, .reveal-scale, .reveal-left, .reveal-right').forEach(el => observer.observe(el));
 }
+
+/* ===== THEME ENGINE & TOGGLE CONTROLLER ===== */
+function initTheme() {
+  const savedTheme = localStorage.getItem('lifelink_theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  setTheme(savedTheme);
+}
+
+function setTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  localStorage.setItem('lifelink_theme', theme);
+  updateThemeToggleIcon(theme);
+}
+
+function toggleTheme() {
+  const currentTheme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+  const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+  setTheme(newTheme);
+}
+
+function updateThemeToggleIcon(theme) {
+  const btn = document.getElementById('theme-toggle-btn');
+  if (!btn) return;
+  if (theme === 'dark') {
+    btn.innerHTML = '☀️';
+    btn.setAttribute('title', 'Switch to Light Mode');
+    btn.setAttribute('aria-label', 'Switch to Light Mode');
+  } else {
+    btn.innerHTML = '🌙';
+    btn.setAttribute('title', 'Switch to Dark Mode');
+    btn.setAttribute('aria-label', 'Switch to Dark Mode');
+  }
+}
+
+// Auto-run theme initialization right away
+initTheme();

@@ -16,13 +16,3 @@ const COMPATIBILITY = {
 const RARE_GROUPS = ['AB-', 'B-', 'O-'];
 
 const CITIES = ['Mumbai', 'Delhi', 'Bangalore', 'Hyderabad', 'Chennai', 'Kolkata', 'Pune', 'Ahmedabad', 'Jaipur', 'Lucknow'];
-
-const DEFAULT_FIREBASE_CONFIG = {
-  apiKey: "AIzaSyCrKfs49UrCQ-FBU-jOOrE5iEq9X2XDyVY",
-  authDomain: "lifeline-2026.firebaseapp.com",
-  projectId: "lifeline-2026",
-  storageBucket: "lifeline-2026.firebasestorage.app",
-  messagingSenderId: "888679569417",
-  appId: "1:888679569417:web:756be3939a005cc129c0d8",
-  measurementId: "G-JLGKZHSEWK"
-};

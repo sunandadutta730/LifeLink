@@ -26,14 +26,9 @@ function renderHome() {
         </div>
 
         <div class="lp-hero-pulse">
-          <div class="lp-pulse-track">
-            <svg viewBox="0 0 1200 70" preserveAspectRatio="none">
-              <path d="M0,35 L200,35 L220,10 L240,60 L260,20 L280,45 L300,35 L500,35 L520,5 L540,65 L560,15 L580,50 L600,35 L800,35 L820,12 L840,58 L860,22 L880,42 L900,35 L1200,35" />
-            </svg>
-            <svg viewBox="0 0 1200 70" preserveAspectRatio="none">
-              <path d="M0,35 L200,35 L220,10 L240,60 L260,20 L280,45 L300,35 L500,35 L520,5 L540,65 L560,15 L580,50 L600,35 L800,35 L820,12 L840,58 L860,22 L880,42 L900,35 L1200,35" />
-            </svg>
-          </div>
+          <svg viewBox="0 0 1200 70" preserveAspectRatio="none">
+            <path d="M0,35 L200,35 L220,10 L240,60 L260,20 L280,45 L300,35 L500,35 L520,5 L540,65 L560,15 L580,50 L600,35 L800,35 L820,12 L840,58 L860,22 L880,42 L900,35 L1200,35" />
+          </svg>
         </div>
       </div>
     </section>
@@ -62,38 +57,38 @@ function renderHome() {
     <section class="section lp-problem-section">
       <div class="container">
         <div class="lp-section-head reveal-up">
-          <div class="lp-eyebrow">${SVG_ICONS.shield(16, 'var(--accent)')} Why LifeLink</div>
-          <h2>Designed for Speed when Seconds Count</h2>
+          <div class="lp-eyebrow">THE PROBLEM</div>
+          <h2>A shortage measured in minutes, not units</h2>
         </div>
 
         <div class="lp-problem-grid">
-          <div class="lp-problem-card reveal-up stagger-1 glow-card">
-            <div class="lp-problem-num">01 / REALTIME MATCHING</div>
-            <h3>Smart Compatibility Engine</h3>
-            <p>Instant multi-directional compatibility matching prevents wrong transfusions and finds exact blood group matches immediately.</p>
+          <div class="lp-problem-card reveal-up stagger-1">
+            <div class="lp-problem-num">01</div>
+            <h3>Rare groups vanish fast</h3>
+            <p>AB-, B- and O- make up a fraction of the donor pool, so hospitals often have zero units on hand when a critical case arrives.</p>
           </div>
 
-          <div class="lp-problem-card reveal-up stagger-2 glow-card">
-            <div class="lp-problem-num">02 / EMERGENCY DISPATCH</div>
-            <h3>Direct Patient Alerts</h3>
-            <p>High-priority emergency alerts broadcast directly to active registered donors in the patient's city with 1-click call response.</p>
+          <div class="lp-problem-card reveal-up stagger-2">
+            <div class="lp-problem-num">02</div>
+            <h3>Families search blind</h3>
+            <p>Relatives call friends, post on social media, and wait — with no way to see who's nearby, eligible, and actually available right now.</p>
           </div>
 
-          <div class="lp-problem-card reveal-up stagger-3 glow-card">
-            <div class="lp-problem-num">03 / CLOUD SYNC</div>
-            <h3>Live Blood Bank Inventory</h3>
-            <p>Centralized cloud database tracks blood bank units in real time so hospitals can check reserve stock without manual calling.</p>
+          <div class="lp-problem-card reveal-up stagger-3">
+            <div class="lp-problem-num">03</div>
+            <h3>Donors go untracked</h3>
+            <p>Willing donors exist everywhere, but without a shared network, hospitals can't reach them the moment it matters.</p>
           </div>
         </div>
 
         <!-- CTA Banner -->
         <div class="lp-cta-banner reveal-scale">
           <div>
-            <h2>Ready to save a life today?</h2>
-            <p>Join LifeLink's network of active donors or check blood group compatibility in seconds.</p>
+            <h2>Your donation can restart a heartbeat.</h2>
+            <p>Join the network — it takes two minutes to register, and you could be the reason someone makes it through the night.</p>
           </div>
           <button class="btn btn-primary btn-lg glow-card" onclick="navigateTo('register')">
-            ${SVG_ICONS.heart(20)} Join Network Free
+            Register as Donor
           </button>
         </div>
       </div>
@@ -338,11 +333,11 @@ function renderDashboard() {
               </div>
               <div class="db-bar-chart">
                 ${Object.entries(DASHBOARD_DATA.requests)
-                  .sort((a, b) => b[1] - a[1])
-                  .map(([group, val]) => {
-                    const pct = Math.round((val / 86) * 100);
-                    const cls = barColors[group] || 'db-bar-blue';
-                    return `
+      .sort((a, b) => b[1] - a[1])
+      .map(([group, val]) => {
+        const pct = Math.round((val / 86) * 100);
+        const cls = barColors[group] || 'db-bar-blue';
+        return `
                       <div class="db-bar-row">
                         <span class="db-bar-label">${group}</span>
                         <div class="db-bar-track">
@@ -352,7 +347,7 @@ function renderDashboard() {
                         </div>
                       </div>
                     `;
-                  }).join('')}
+      }).join('')}
               </div>
             </div>
 
@@ -432,6 +427,7 @@ function animateDashboardBars() {
 
 // Initial Bootstrapper
 document.addEventListener('DOMContentLoaded', () => {
+  if (typeof initTheme === 'function') initTheme();
   initFirebaseBackend();
 
   // Bind nav link clicks using data-page attribute
