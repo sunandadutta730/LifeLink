@@ -21,8 +21,8 @@ function renderAdmin() {
   }
 
   const activeDonorsCount = registeredDonors.filter(d => d.available).length;
-  const pendingReqCount = emergencyRequestsList.filter(r => r.status === 'Pending').length;
-  const totalStockUnits = BLOOD_BANKS.reduce((acc, b) => acc + b.units, 0);
+  const pendingReqCount = emergencyRequestsList.filter(r => r.status === 'PENDING' || r.status === 'Pending').length;
+  const totalStockUnits = BLOOD_BANKS.reduce((acc, b) => acc + (b.units || 0), 0);
 
   return `
     <div class="page-header" style="background: linear-gradient(180deg, #1f2937 0%, #111827 100%); color: #fff;">
@@ -66,13 +66,9 @@ function renderAdmin() {
           <div class="admin-tabs">
             <button class="admin-tab ${activeAdminTab === 'donors' ? 'active' : ''}" onclick="switchAdminTab('donors')">Registered Donors (${registeredDonors.length})</button>
             <button class="admin-tab ${activeAdminTab === 'requests' ? 'active' : ''}" onclick="switchAdminTab('requests')">Emergency Feed (${emergencyRequestsList.length})</button>
-            <button class="admin-tab ${activeAdminTab === 'banks' ? 'active' : ''}" onclick="switchAdminTab('banks')">Blood Banks Stock</button>
+            <button class="admin-tab ${activeAdminTab === 'banks' ? 'active' : ''}" onclick="switchAdminTab('banks')">Blood Banks Stock (${BLOOD_BANKS.length})</button>
             <button class="admin-tab ${activeAdminTab === 'alerts' ? 'active' : ''}" onclick="switchAdminTab('alerts')">Broadcast Alert</button>
           </div>
-
-          <button class="btn btn-outline btn-sm" onclick="handleUserLogout()" style="border-color: var(--critical); color: var(--critical);">
-            Exit Admin Session
-          </button>
         </div>
 
         <!-- Tab Body -->
@@ -135,31 +131,37 @@ function renderAdminTabBody() {
         <table class="admin-table">
           <thead>
             <tr>
-              <th>Request ID</th>
+              <th>Req ID</th>
               <th>Patient</th>
               <th>Blood</th>
               <th>Hospital & City</th>
               <th>Units</th>
-              <th>Urgency</th>
               <th>Status</th>
-              <th>Manage Status</th>
+              <th>Accepted Bank</th>
+              <th>Confirmations</th>
+              <th>Timeline & Actions</th>
             </tr>
           </thead>
           <tbody>
             ${emergencyRequestsList.map((r, index) => `
               <tr>
                 <td><code>${r.id}</code></td>
-                <td><strong>${r.patient}</strong></td>
-                <td><span class="blood-badge">${r.blood}</span></td>
-                <td>${r.hospital}, ${r.city}</td>
+                <td><strong>${r.patient || r.patientName}</strong></td>
+                <td><span class="blood-badge">${r.blood || r.bloodGroup}</span></td>
+                <td>${r.hospital || r.hospitalName}, ${r.city}</td>
                 <td>${r.units}u</td>
-                <td><span class="badge ${getUrgencyClass(r.urgency)}">${r.urgency}</span></td>
-                <td><span class="status-badge ${r.status.toLowerCase().replace(' ', '-')}">${r.status}</span></td>
+                <td><span class="badge ${r.status === 'COMPLETED' ? 'badge-green' : (r.status === 'ACCEPTED' ? 'badge-blue' : 'badge-amber')}">${r.status || 'PENDING'}</span></td>
+                <td>${r.acceptedBy ? `<strong>${r.acceptedBy.bankName}</strong>` : '<span style="color:var(--text-muted);">Unassigned</span>'}</td>
+                <td>
+                  <div style="font-size: 0.78rem;">
+                    Patient: <span class="badge ${r.patientConfirmed ? 'badge-green' : 'badge-amber'}">${r.patientConfirmed ? 'YES' : 'NO'}</span><br>
+                    Bank: <span class="badge ${r.bankConfirmed ? 'badge-green' : 'badge-amber'}">${r.bankConfirmed ? 'YES' : 'NO'}</span>
+                  </div>
+                </td>
                 <td>
                   <div style="display: flex; gap: 6px; flex-wrap: wrap;">
-                    <button class="admin-action-btn" onclick="adminUpdateReqStatus(${index}, 'In Progress')">In Progress</button>
-                    <button class="admin-action-btn" onclick="adminUpdateReqStatus(${index}, 'Resolved')">Resolved</button>
-                    <button class="admin-action-btn danger" onclick="adminDeleteRequest(${index})">${SVG_ICONS.trash(12)} Delete</button>
+                    <button class="admin-action-btn" onclick="openAdminTimelineModal('${r.id}')">Timeline</button>
+                    <button class="admin-action-btn danger" onclick="adminDeleteRequest('${r.id}')">${SVG_ICONS.trash(12)}</button>
                   </div>
                 </td>
               </tr>
@@ -187,13 +189,13 @@ function renderAdminTabBody() {
             ${BLOOD_BANKS.map((b, index) => `
               <tr>
                 <td><strong>${b.name}</strong></td>
-                <td>${b.location}</td>
-                <td><strong>${b.units} Units</strong></td>
-                <td><span class="badge ${b.units > 100 ? 'badge-green' : 'badge-amber'}">${b.units > 100 ? 'Adequate' : 'Running Low'}</span></td>
+                <td>${b.location || b.city}</td>
+                <td><strong>${b.units || 0} Units</strong></td>
+                <td><span class="badge ${(b.units || 0) > 100 ? 'badge-green' : 'badge-amber'}">${(b.units || 0) > 100 ? 'Adequate' : 'Running Low'}</span></td>
                 <td>
                   <div style="display: flex; gap: 6px; align-items: center;">
-                    <button class="admin-action-btn" onclick="adminUpdateStock(${index}, 10)">+10 Units</button>
-                    <button class="admin-action-btn danger" onclick="adminUpdateStock(${index}, -10)">-10 Units</button>
+                    <button class="admin-action-btn" onclick="adminUpdateStock('${b.id}', 10)">+10 Units</button>
+                    <button class="admin-action-btn danger" onclick="adminUpdateStock('${b.id}', -10)">-10 Units</button>
                   </div>
                 </td>
               </tr>
@@ -232,75 +234,121 @@ function renderAdminTabBody() {
   return '';
 }
 
-function adminToggleDonorStatus(index) {
-  if (registeredDonors[index]) {
-    registeredDonors[index].available = !registeredDonors[index].available;
+async function adminToggleDonorStatus(index) {
+  const donor = registeredDonors[index];
+  if (!donor) return;
 
-    // Sync to Firestore if connected
-    if (typeof firebase !== 'undefined' && firebase.apps.length && db && registeredDonors[index].id) {
-      db.collection('donors').doc(registeredDonors[index].id).update({
-        available: registeredDonors[index].available
-      }).catch(() => { });
+  donor.available = !donor.available;
+
+  // Sync strictly to donors collection in Firestore
+  if (typeof db !== 'undefined' && db && donor.id) {
+    try {
+      await db.collection('donors').doc(donor.id).update({
+        available: donor.available
+      });
+    } catch (err) {
+      console.error('Update donor error:', err);
     }
-
-    showToast(`Donor status updated for ${registeredDonors[index].name}`, 'success');
-    renderPage();
   }
+
+  showToast(`Donor status updated for ${donor.name}`, 'success');
+  renderPage();
 }
 
-function adminUpdateReqStatus(index, newStatus) {
-  if (emergencyRequestsList[index]) {
-    emergencyRequestsList[index].status = newStatus;
-
-    if (typeof firebase !== 'undefined' && firebase.apps.length && db) {
-      db.collection('emergency').doc(emergencyRequestsList[index].id).update({
-        status: newStatus
-      }).catch(() => { });
+async function adminDeleteRequest(reqId) {
+  if (typeof db !== 'undefined' && db) {
+    try {
+      await db.collection('bloodRequests').doc(reqId).delete();
+    } catch (err) {
+      console.error('Delete request error:', err);
     }
-
-    showToast(`Request ${emergencyRequestsList[index].id} marked as ${newStatus}`, 'success');
-    renderPage();
   }
+
+  emergencyRequestsList = emergencyRequestsList.filter(r => r.id !== reqId);
+  showToast(`Emergency request ${reqId} deleted from Firestore`, 'info');
+  renderPage();
 }
 
-function adminDeleteRequest(index) {
-  if (emergencyRequestsList[index]) {
-    const reqId = emergencyRequestsList[index].id;
+async function adminUpdateStock(bankId, delta) {
+  const bank = BLOOD_BANKS.find(b => b.id === bankId);
+  if (!bank) return;
 
-    if (typeof firebase !== 'undefined' && firebase.apps.length && db) {
-      db.collection('emergency').doc(reqId).delete().catch(() => { });
+  bank.units = Math.max(0, (bank.units || 0) + delta);
+
+  if (typeof db !== 'undefined' && db) {
+    try {
+      await db.collection('bloodBanks').doc(bankId).update({
+        units: bank.units
+      });
+    } catch (err) {
+      console.error('Stock update error:', err);
     }
-
-    emergencyRequestsList.splice(index, 1);
-    showToast(`Emergency request ${reqId} deleted`, 'info');
-    renderPage();
   }
+
+  showToast(`Stock updated for ${bank.name}`, 'success');
+  renderPage();
 }
 
-function adminUpdateStock(index, delta) {
-  if (BLOOD_BANKS[index]) {
-    BLOOD_BANKS[index].units = Math.max(0, BLOOD_BANKS[index].units + delta);
+function openAdminTimelineModal(reqId) {
+  const req = emergencyRequestsList.find(r => r.id === reqId);
+  if (!req) return;
 
-    if (typeof firebase !== 'undefined' && firebase.apps.length && db && BLOOD_BANKS[index].firestoreId) {
-      db.collection('blood_banks').doc(BLOOD_BANKS[index].firestoreId).update({
-        units: BLOOD_BANKS[index].units
-      }).catch(() => { });
-    }
+  const steps = req.progressTimeline || [
+    { step: 'Request Submitted', time: req.reqDate || req.createdAt },
+    { step: 'Broadcast Sent to Blood Banks', time: req.reqDate || req.createdAt }
+  ];
 
-    showToast(`Stock updated for ${BLOOD_BANKS[index].name}`, 'success');
-    renderPage();
-  }
+  const bodyHtml = `
+    <div style="margin-bottom: 20px;">
+      <h4 style="font-size: 1.15rem; font-weight: 800; margin: 0 0 6px;">Request ${req.id} Audit Timeline</h4>
+      <p style="font-size: 0.85rem; color: var(--text-secondary); margin: 0;">
+        Patient: <strong>${req.patient || req.patientName}</strong> (${req.blood || req.bloodGroup}) • Hospital: ${req.hospital || req.hospitalName}
+      </p>
+    </div>
+
+    <div style="background: var(--bg-muted); padding: 18px; border-radius: var(--radius-md); margin-bottom: 20px;">
+      <div style="font-weight: 700; font-size: 0.85rem; color: var(--accent); margin-bottom: 12px;">STEP-BY-STEP PROGRESS LOG:</div>
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        ${steps.map((st, idx) => `
+          <div style="display: flex; align-items: center; justify-content: space-between; background: var(--bg-secondary); padding: 10px 14px; border-radius: var(--radius-sm); border: 1px solid var(--border-color); font-size: 0.88rem;">
+            <span><strong>Step ${idx + 1}:</strong> ${st.step}</span>
+            <span style="font-size: 0.78rem; color: var(--text-muted);">${new Date(st.time || Date.now()).toLocaleString()}</span>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+
+    <div style="display: flex; gap: 14px; font-size: 0.85rem; background: var(--bg-muted); padding: 12px; border-radius: var(--radius-md);">
+      <div>Patient Confirmed: <strong style="color: ${req.patientConfirmed ? '#10b981' : '#f59e0b'};">${req.patientConfirmed ? 'YES ✅' : 'PENDING ⏳'}</strong></div>
+      <div>Blood Bank Confirmed: <strong style="color: ${req.bankConfirmed ? '#10b981' : '#f59e0b'};">${req.bankConfirmed ? 'YES ✅' : 'PENDING ⏳'}</strong></div>
+    </div>
+  `;
+
+  showModal(`Emergency Dispatch #${reqId}`, bodyHtml, [
+    { text: 'Close Timeline', class: 'btn-outline', action: () => closeModal() }
+  ]);
 }
 
-function publishAlert(e) {
+async function publishAlert(e) {
   e.preventDefault();
   const type = document.getElementById('alert-type').value;
   const text = document.getElementById('alert-text').value.trim();
 
-  if (text) {
-    DASHBOARD_DATA.alerts.unshift({ type, text });
-    showToast('🚨 Alert published to platform dashboard!', 'success');
-    document.getElementById('alert-text').value = '';
-    switchAdminTab('requests');
+  if (text && typeof db !== 'undefined' && db) {
+    try {
+      await db.collection('notifications').add({
+        targetRole: 'all',
+        title: type === 'critical' ? '🚨 CRITICAL NETWORK ALERT' : '⚠️ AMBER SHORTAGE WARNING',
+        message: text,
+        type: 'SYSTEM_ALERT',
+        timestamp: new Date().toISOString(),
+        read: false
+      });
+      showToast('🚨 Alert published to platform notifications collection in Firestore!', 'success');
+      document.getElementById('alert-text').value = '';
+      switchAdminTab('requests');
+    } catch (err) {
+      console.error('Publish alert error:', err);
+    }
   }
 }

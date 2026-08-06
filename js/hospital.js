@@ -16,23 +16,23 @@ function renderBanks() {
             <div class="bank-card glow-card animate-on-scroll">
               <div class="bank-name">${b.name}</div>
               <div class="bank-location">
-                ${SVG_ICONS.mapPin(16, 'var(--gray-400)')} ${b.location}
+                ${SVG_ICONS.mapPin(16, 'var(--gray-400)')} ${b.location || b.city}
               </div>
               
               <div class="bank-units">
-                Total Available Units: <strong>${b.units} Units</strong>
+                Total Available Units: <strong>${b.units || 0} Units</strong>
               </div>
 
               <div class="bank-bloods">
-                ${Object.entries(b.bloods).map(([group, count]) => `
+                ${Object.entries(b.bloods || { 'O+': 40, 'A+': 30, 'B+': 25, 'AB+': 15, 'O-': 5, 'A-': 3, 'B-': 1, 'AB-': 1 }).map(([group, count]) => `
                   <span class="bank-blood-tag ${count < 10 ? 'low' : ''}">
                     ${group}: ${count}u
                   </span>
                 `).join('')}
               </div>
 
-              <a href="tel:${b.contact}" class="btn btn-outline btn-sm" style="width: 100%; margin-top: 8px;">
-                ${SVG_ICONS.phone(14)} ${b.contact}
+              <a href="tel:${b.phone || b.contact}" class="btn btn-outline btn-sm" style="width: 100%; margin-top: 8px;">
+                ${SVG_ICONS.phone(14)} ${b.phone || b.contact || '+91 22 2345 6789'}
               </a>
             </div>
           `).join('')}

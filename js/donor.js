@@ -1,8 +1,6 @@
 /* ===== LifeLink Donor Management Module ===== */
 
-let registeredDonors = [...SAMPLE_DONORS];
-
-function handleRegister(e) {
+async function handleRegister(e) {
   e.preventDefault();
   const name = document.getElementById('reg-name').value.trim();
   const blood = document.getElementById('reg-blood').value;
@@ -15,29 +13,41 @@ function handleRegister(e) {
     return;
   }
 
-  if (isDuplicateDonorRecord(registeredDonors, null, phone)) {
+  if (typeof isDuplicateDonorRecord === 'function' && isDuplicateDonorRecord(registeredDonors, null, phone)) {
     showToast('⚠️ This mobile number is already registered as a donor!', 'error');
     return;
   }
 
+  const NOW = new Date().toISOString();
   const newDonor = {
+    id: `DNR-${Date.now().toString().slice(-6)}`,
     name,
     blood,
     city,
     phone,
     available: true,
-    lastDonation: lastDonation || new Date().toISOString().split('T')[0],
+    lastDonation: lastDonation || NOW.split('T')[0],
     donations: 1,
-    registeredAt: new Date().toISOString()
+    registeredAt: NOW
   };
 
-  registeredDonors.unshift(newDonor);
+  // Sync strictly to donors and users collection in Firestore
+  if (typeof db !== 'undefined' && db) {
+    try {
+      await db.collection('donors').doc(newDonor.id).set(newDonor);
+      console.log('✅ Donor saved to donors collection:', newDonor.id);
 
-  // Sync strictly to donors collection in Firestore
-  if (typeof firebase !== 'undefined' && firebase.apps.length && db) {
-    db.collection('donors').add(newDonor)
-      .then(ref => console.log('✅ Donor saved to donors table:', ref.id))
-      .catch(err => console.error('❌ donors table error:', err));
+      await db.collection('users').add({
+        name,
+        phone,
+        blood,
+        city,
+        role: 'donor',
+        createdAt: NOW
+      });
+    } catch (err) {
+      console.error('❌ Firestore donors write error:', err);
+    }
   }
 
   showRegistrationSuccessModal(newDonor);
@@ -123,7 +133,7 @@ function renderRegister() {
               <div class="reg-info-icon red">${SVG_ICONS.users(18, 'var(--red-600)')}</div>
               <div class="reg-info-text">
                 <div class="label">Active Donors</div>
-                <div class="value">${donorCount}+ Available</div>
+                <div class="value">${donorCount} Available</div>
               </div>
             </div>
             <div class="reg-info-item">
@@ -287,7 +297,7 @@ function renderDonorCards(donors, container) {
           ${SVG_ICONS.phone(16, 'var(--gray-400)')} ${d.phone}
         </div>
         <div class="donor-detail">
-          ${SVG_ICONS.droplet(16, 'var(--gray-400)')} ${d.donations} Total Donations
+          ${SVG_ICONS.droplet(16, 'var(--gray-400)')} ${d.donations || 0} Total Donations
         </div>
       </div>
       <a href="tel:${d.phone}" class="btn btn-primary btn-sm glow-card" style="width: 100%; font-weight: 700;">

@@ -74,6 +74,7 @@ function renderPage() {
     case 'awareness': main.innerHTML = renderAwareness(); break;
     case 'dashboard': main.innerHTML = renderDashboard(); break;
     case 'admin': main.innerHTML = renderAdmin(); break;
+    case 'bank-portal': main.innerHTML = renderBloodBankPortal(); break;
     default: main.innerHTML = renderHome();
   }
 
@@ -91,28 +92,56 @@ function updateAuthHeader() {
   const container = document.getElementById('header-auth-container');
   if (!container) return;
 
-  if (isAdminLoggedIn) {
+  if (typeof currentBloodBankSession !== 'undefined' && currentBloodBankSession) {
+    container.innerHTML = `
+      <button class="btn btn-primary btn-sm nav-login-btn glow-card" onclick="navigateTo('bank-portal')">🏥 ${currentBloodBankSession.name || 'Blood Bank Portal'}</button>
+      <button class="btn btn-outline btn-sm" onclick="handleBankLogout()" style="border-color: var(--accent); color: var(--accent);">Logout Bank</button>
+    `;
+  } else if (isAdminLoggedIn) {
     container.innerHTML = `
       <button class="btn btn-primary btn-sm nav-login-btn glow-card" onclick="navigateTo('admin')">${SVG_ICONS.shield(14)} Admin Panel</button>
-      <button class="btn btn-outline btn-sm" onclick="handleUserLogout()" style="padding: 4px 10px; font-size: 0.8rem; border-color: var(--accent); color: var(--accent);">Log Out</button>
+      <button class="btn btn-outline btn-sm" onclick="handleUserLogout()" style="border-color: var(--accent); color: var(--accent);">Log Out</button>
     `;
   } else if (currentUserAccount) {
     const displayName = currentUserAccount.name || (currentUserAccount.email ? currentUserAccount.email.split('@')[0] : 'User');
     const firstInitial = displayName.charAt(0).toUpperCase();
 
     container.innerHTML = `
-      <div style="display: flex; align-items: center; gap: 10px;">
-        <div class="user-avatar-badge" onclick="openUserProfileModal()" title="View Profile (${displayName})">
-          <span>${firstInitial}</span>
-        </div>
-        <button class="btn btn-outline btn-sm" onclick="handleUserLogout()" style="padding: 4px 10px; font-size: 0.8rem; border-color: var(--accent); color: var(--accent);">Log Out</button>
+      <div class="user-avatar-badge" onclick="openUserProfileModal()" title="View Profile (${displayName})">
+        <span>${firstInitial}</span>
       </div>
+      <button class="btn btn-outline btn-sm" onclick="handleUserLogout()" style="border-color: var(--accent); color: var(--accent);">Log Out</button>
     `;
   } else {
     container.innerHTML = `
-      <button class="btn btn-primary btn-sm nav-login-btn glow-card" onclick="openAuthModal('signup', 'user')">🚀 Sign Up / Login</button>
+      <button class="btn btn-outline btn-sm" onclick="openBloodBankLoginModal()" style="border-color: var(--border-color);">🏥 Blood Bank</button>
+      <button class="btn btn-primary btn-sm nav-login-btn glow-card" onclick="openAuthModal('signup', 'user')">🚀 Login / Sign Up</button>
     `;
   }
+}
+
+function openNotificationCenterModal() {
+  const bodyHtml = `
+    <div style="max-height: 400px; overflow-y: auto; text-align: left;">
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <div style="background: var(--bg-muted); padding: 12px; border-radius: var(--radius-md); border-left: 4px solid var(--accent);">
+          <strong style="color: var(--accent); font-size: 0.88rem;">🚨 Emergency Request Broadcast</strong>
+          <p style="margin: 2px 0 0; font-size: 0.82rem; color: var(--text-secondary);">Urgent O+ Blood needed at Lilavati Hospital, Mumbai.</p>
+        </div>
+        <div style="background: var(--bg-muted); padding: 12px; border-radius: var(--radius-md); border-left: 4px solid #10b981;">
+          <strong style="color: #10b981; font-size: 0.88rem;">✅ Request Accepted</strong>
+          <p style="margin: 2px 0 0; font-size: 0.82rem; color: var(--text-secondary);">Apollo Blood Centre accepted Request #REQ-002.</p>
+        </div>
+        <div style="background: var(--bg-muted); padding: 12px; border-radius: var(--radius-md); border-left: 4px solid #3b82f6;">
+          <strong style="color: #3b82f6; font-size: 0.88rem;">📢 National Grid Alert</strong>
+          <p style="margin: 2px 0 0; font-size: 0.82rem; color: var(--text-secondary);">Low stock warning for B- and O- components in North Zone.</p>
+        </div>
+      </div>
+    </div>
+  `;
+  showModal('🔔 Real-Time Notifications Center', bodyHtml, [
+    { text: 'Mark All as Read', class: 'btn-primary', action: () => { closeModal(); showToast('Notifications cleared', 'success'); } }
+  ]);
 }
 
 function toggleMobileMenu() {

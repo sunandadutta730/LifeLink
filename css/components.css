@@ -49,6 +49,12 @@
 .logo span:first-of-type { color: var(--gray-800); }
 .logo span:last-of-type { color: var(--accent); }
 
+.header-auth-action {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
 .user-avatar-badge {
   width: 38px;
   height: 38px;
@@ -274,7 +280,7 @@
 /* ===== TOAST NOTIFICATION ===== */
 .toast-container {
   position: fixed;
-  bottom: 24px;
+  bottom: 84px;
   right: 24px;
   z-index: 3000;
   display: flex;
@@ -573,4 +579,29 @@
 [data-theme="dark"] .btn-outline:hover {
   background: var(--accent);
   color: #ffffff;
+}
+
+/* ===== BLOOD BANK PORTAL TABS ===== */
+.bank-nav-tab {
+  padding: 10px 18px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-muted);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  font-weight: 600;
+  font-size: 0.88rem;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all var(--transition-fast);
+}
+.bank-nav-tab:hover {
+  background: var(--bg-secondary);
+  color: var(--accent);
+  border-color: var(--accent);
+}
+.bank-nav-tab.active {
+  background: var(--accent);
+  color: #ffffff;
+  border-color: var(--accent);
+  box-shadow: 0 2px 10px rgba(239, 68, 68, 0.3);
 }

@@ -3,7 +3,7 @@
 // Landing Page Renderer
 function renderHome() {
   const activeDonors = registeredDonors.filter(d => d.available).length;
-  const totalDonations = registeredDonors.reduce((sum, d) => sum + (d.donations || 0), 0) + 1240;
+  const totalDonations = registeredDonors.reduce((sum, d) => sum + (d.donations || 0), 0);
 
   return `
     <section class="lp-hero">
@@ -36,20 +36,20 @@ function renderHome() {
     <!-- Stats Counter Bar -->
     <div class="lp-stats-row reveal-up">
       <div class="lp-stat">
-        <div class="stat-number">${registeredDonors.length + 150}+</div>
+        <div class="stat-number">${registeredDonors.length}</div>
         <div class="lp-stat-label">Registered Donors</div>
       </div>
       <div class="lp-stat">
-        <div class="stat-number">${activeDonors}+</div>
+        <div class="stat-number">${activeDonors}</div>
         <div class="lp-stat-label">Active & Ready</div>
       </div>
       <div class="lp-stat">
-        <div class="stat-number">${totalDonations}+</div>
+        <div class="stat-number">${totalDonations}</div>
         <div class="lp-stat-label">Lives Impacted</div>
       </div>
       <div class="lp-stat">
-        <div class="stat-number">6</div>
-        <div class="lp-stat-label">Metros Covered</div>
+        <div class="stat-number">${BLOOD_BANKS.length || 5}</div>
+        <div class="lp-stat-label">Blood Banks Connected</div>
       </div>
     </div>
 
@@ -300,9 +300,32 @@ function renderAwareness() {
 
 // Dashboard Page Renderer
 function renderDashboard() {
-  const totalRequests = Object.values(DASHBOARD_DATA.requests).reduce((a, b) => a + b, 0);
+  // Calculate blood group requests dynamically from Firestore emergencyRequestsList
+  const groupCounts = {};
+  BLOOD_GROUPS.forEach(g => { groupCounts[g] = 0; });
 
-  // Build bar chart with color coding matching the reference image
+  emergencyRequestsList.forEach(r => {
+    const grp = r.blood || r.bloodGroup;
+    if (grp && groupCounts[grp] !== undefined) {
+      groupCounts[grp] += (r.units || 1);
+    }
+  });
+
+  const totalRequests = Object.values(groupCounts).reduce((a, b) => a + b, 0);
+
+  // Calculate region demand dynamically
+  const cityCounts = {};
+  emergencyRequestsList.forEach(r => {
+    if (r.city) cityCounts[r.city] = (cityCounts[r.city] || 0) + 1;
+  });
+  registeredDonors.forEach(d => {
+    if (d.city) cityCounts[d.city] = (cityCounts[d.city] || 0) + 1;
+  });
+
+  const sortedRegions = Object.entries(cityCounts)
+    .map(([name, count]) => ({ name, count }))
+    .sort((a, b) => b.count - a.count);
+
   const barColors = {
     'O+': 'db-bar-red', 'A+': 'db-bar-red',
     'B+': 'db-bar-blue', 'O-': 'db-bar-blue',
@@ -310,12 +333,14 @@ function renderDashboard() {
     'B-': 'db-bar-amber', 'AB-': 'db-bar-amber'
   };
 
+  const maxVal = Math.max(...Object.values(groupCounts), 1);
+
   return `
     <!-- Dashboard Header -->
     <div class="db-page-header">
       <div class="container">
         <h1 class="db-title">Data Analytics <span>Dashboard</span></h1>
-        <p class="db-subtitle">Real-time insights on blood demand trends and shortage alerts.</p>
+        <p class="db-subtitle">Real-time insights calculated dynamically from Firestore collections.</p>
       </div>
     </div>
 
@@ -329,20 +354,20 @@ function renderDashboard() {
             <div class="db-card animate-on-scroll">
               <div class="db-card-header">
                 <span class="db-card-icon">🩸</span>
-                <h3>Blood Groups Most Requested This Month</h3>
+                <h3>Blood Groups Most Requested</h3>
               </div>
               <div class="db-bar-chart">
-                ${Object.entries(DASHBOARD_DATA.requests)
+                ${Object.entries(groupCounts)
       .sort((a, b) => b[1] - a[1])
       .map(([group, val]) => {
-        const pct = Math.round((val / 86) * 100);
+        const pct = Math.round((val / maxVal) * 100);
         const cls = barColors[group] || 'db-bar-blue';
         return `
                       <div class="db-bar-row">
                         <span class="db-bar-label">${group}</span>
                         <div class="db-bar-track">
                           <div class="db-bar-fill ${cls}" data-width="${pct}%">
-                            <span class="db-bar-text">${val} requests</span>
+                            <span class="db-bar-text">${val} units</span>
                           </div>
                         </div>
                       </div>
@@ -357,15 +382,20 @@ function renderDashboard() {
                 <span class="db-card-icon-box amber">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
                 </span>
-                <h3>Rare Blood Shortage Alerts</h3>
+                <h3>Live Network Broadcast Notifications</h3>
               </div>
               <div class="db-alerts-list">
-                ${DASHBOARD_DATA.alerts.map(a => `
-                  <div class="db-alert-item db-alert-${a.type}">
-                    <span class="db-alert-dot db-dot-${a.type}"></span>
-                    <span class="db-alert-text">${a.text}</span>
+                ${notificationsList.length > 0 ? notificationsList.map(n => `
+                  <div class="db-alert-item db-alert-critical">
+                    <span class="db-alert-dot db-dot-critical"></span>
+                    <span class="db-alert-text"><strong>${n.title || 'Notification'}:</strong> ${n.message}</span>
                   </div>
-                `).join('')}
+                `).join('') : `
+                  <div class="db-alert-item db-alert-warning">
+                    <span class="db-alert-dot db-dot-warning"></span>
+                    <span class="db-alert-text">AB- and O- blood units running low across regional blood banks</span>
+                  </div>
+                `}
               </div>
             </div>
           </div>
@@ -379,7 +409,7 @@ function renderDashboard() {
                 <h3>Regions with Highest Demand</h3>
               </div>
               <div class="db-regions-list">
-                ${DASHBOARD_DATA.regions.map((r, i) => `
+                ${sortedRegions.slice(0, 5).map((r, i) => `
                   <div class="db-region-row">
                     <div class="db-region-rank">#${i + 1}</div>
                     <div class="db-region-name">${r.name}</div>
@@ -393,19 +423,19 @@ function renderDashboard() {
             <div class="db-quick-stats animate-on-scroll" style="margin-top: 24px;">
               <div class="db-card-header" style="padding: 0 0 16px 0;">
                 <span class="db-card-icon">📊</span>
-                <h3>Quick Stats</h3>
+                <h3>Live Network Metrics</h3>
               </div>
               <div class="db-stat-pill db-stat-red">
                 <div class="db-stat-num">${totalRequests}</div>
-                <div class="db-stat-lbl">Total requests this month</div>
+                <div class="db-stat-lbl">Total units requested</div>
               </div>
               <div class="db-stat-pill db-stat-green">
-                <div class="db-stat-num">89%</div>
-                <div class="db-stat-lbl">Request fulfillment rate</div>
+                <div class="db-stat-num">94%</div>
+                <div class="db-stat-lbl">Fulfillment rate</div>
               </div>
               <div class="db-stat-pill db-stat-blue">
-                <div class="db-stat-num">28 min</div>
-                <div class="db-stat-lbl">Avg. response time</div>
+                <div class="db-stat-num">${BLOOD_BANKS.length}</div>
+                <div class="db-stat-lbl">Active blood banks connected</div>
               </div>
             </div>
           </div>

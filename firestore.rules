@@ -1,0 +1,117 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() && (request.auth.token.role == 'admin' || request.auth.token.admin == true);
+    }
+
+    function isBloodBank() {
+      return isAuthenticated() && (request.auth.token.role == 'blood_bank' || request.auth.token.role == 'bank');
+    }
+
+    // 1. users
+    match /users/{userId} {
+      allow read, write: if true;
+    }
+
+    // 2. donors
+    match /donors/{donorId} {
+      allow read, write: if true;
+    }
+
+    // 3. receivers
+    match /receivers/{receiverId} {
+      allow read, write: if true;
+    }
+
+    // 4. bloodBanks
+    match /bloodBanks/{bankId} {
+      allow read, write: if true;
+    }
+
+    // 5. bloodInventory
+    match /bloodInventory/{inventoryId} {
+      allow read, write: if true;
+    }
+
+    // 6. bloodRequests
+    match /bloodRequests/{requestId} {
+      allow read, write: if true;
+    }
+
+    // 7. dispatches
+    match /dispatches/{dispatchId} {
+      allow read, write: if true;
+    }
+
+    // 8. notifications
+    match /notifications/{notificationId} {
+      allow read, write: if true;
+    }
+
+    // 9. donations
+    match /donations/{donationId} {
+      allow read, write: if true;
+    }
+
+    // 10. contractDonors
+    match /contractDonors/{donorId} {
+      allow read, write: if true;
+    }
+
+    // 11. ngoPartners
+    match /ngoPartners/{partnerId} {
+      allow read, write: if true;
+    }
+
+    // 12. bloodCollectionCamps
+    match /bloodCollectionCamps/{campId} {
+      allow read, write: if true;
+    }
+
+    // 13. bloodBankStaff
+    match /bloodBankStaff/{staffId} {
+      allow read, write: if true;
+    }
+
+    // 14. activityLogs
+    match /activityLogs/{logId} {
+      allow read, write: if true;
+    }
+
+    // 15. reports
+    match /reports/{reportId} {
+      allow read, write: if true;
+    }
+
+    // 16. settings
+    match /settings/{settingId} {
+      allow read, write: if true;
+    }
+
+    // 17. moneyDonations
+    match /moneyDonations/{donationId} {
+      allow read, write: if true;
+    }
+
+    // Legacy collections fallback
+    match /admins/{adminId} {
+      allow read, write: if true;
+    }
+    match /emergency/{reqId} {
+      allow read, write: if true;
+    }
+    match /logins/{loginId} {
+      allow read, write: if true;
+    }
+    match /blood_banks/{bankId} {
+      allow read, write: if true;
+    }
+  }
+}

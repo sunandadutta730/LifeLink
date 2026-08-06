@@ -4,9 +4,6 @@
 config/firebase-config.js
 firebase-config.js
 
-# Seed script with local API keys
-seed.js
-
 # Dependencies
 node_modules/
 package-lock.json
@@ -26,3 +23,6 @@ Thumbs.db
 # Temporary files & logs
 *.log
 *.tmp
+
+
+

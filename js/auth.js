@@ -12,10 +12,20 @@ function saveAccountToLocalStore(userObj) {
 }
 
 function findExistingAccount(email, phone) {
-  const existing = JSON.parse(localStorage.getItem('lifelink_users_db')) || [];
   const cleanPhone = getCleanPhoneNumber(phone);
   const cleanEmail = email ? email.trim().toLowerCase() : '';
 
+  // 1. Search in-memory users list from Firestore
+  if (typeof allUsersList !== 'undefined' && allUsersList.length > 0) {
+    const found = allUsersList.find(u =>
+      (cleanEmail && u.email && u.email.trim().toLowerCase() === cleanEmail) ||
+      (cleanPhone && u.phone && getCleanPhoneNumber(u.phone) === cleanPhone)
+    );
+    if (found) return found;
+  }
+
+  // 2. Fallback to localStorage
+  const existing = JSON.parse(localStorage.getItem('lifelink_users_db')) || [];
   return existing.find(u =>
     (cleanEmail && u.email && u.email.trim().toLowerCase() === cleanEmail) ||
     (cleanPhone && u.phone && getCleanPhoneNumber(u.phone) === cleanPhone)
@@ -137,7 +147,7 @@ function switchAuthMode(mode, role = 'user') {
   openAuthModal(mode, role);
 }
 
-function handleAuthSignup(e, role) {
+async function handleAuthSignup(e, role) {
   e.preventDefault();
   const name = document.getElementById('auth-name').value.trim();
   const email = document.getElementById('auth-email').value.trim().toLowerCase();
@@ -149,34 +159,20 @@ function handleAuthSignup(e, role) {
     return;
   }
 
-  // 1. Check local duplicates
-  const existingLocal = findExistingAccount(email, phone);
-  if (existingLocal) {
-    showToast('⚠️ A user with this email or phone number is already registered!', 'error');
-    return;
-  }
-
-  // 2. Check Firestore duplicates
-  if (typeof firebase !== 'undefined' && firebase.apps.length && firebase.firestore) {
-    const firestoreDb = firebase.firestore();
-    firestoreDb.collection('users').get().then(snap => {
-      const isDuplicateInDb = snap.docs.some(doc => {
-        const d = doc.data();
-        return (d.email && d.email.toLowerCase() === email) || (d.phone && getCleanPhoneNumber(d.phone) === getCleanPhoneNumber(phone));
-      });
-
-      if (isDuplicateInDb) {
-        showToast('⚠️ A user with this email or phone number is already registered!', 'error');
+  // 1. Check duplicate accounts in Firestore
+  if (typeof db !== 'undefined' && db) {
+    try {
+      const snap = await db.collection('users').where('email', '==', email).get();
+      if (!snap.empty) {
+        showToast('⚠️ A user with this email address is already registered!', 'error');
         return;
       }
-
-      completeUserSignup(name, email, phone, password, role);
-    }).catch(() => {
-      completeUserSignup(name, email, phone, password, role);
-    });
-  } else {
-    completeUserSignup(name, email, phone, password, role);
+    } catch (err) {
+      console.warn('Duplicate check warning:', err.message);
+    }
   }
+
+  completeUserSignup(name, email, phone, password, role);
 }
 
 function completeUserSignup(name, email, phone, password, role) {
@@ -185,7 +181,7 @@ function completeUserSignup(name, email, phone, password, role) {
     email,
     phone,
     password,
-    role: role || 'user',
+    role: role === 'admin' ? 'admin' : 'donor',
     signedUpAt: new Date().toISOString()
   };
 
@@ -193,7 +189,8 @@ function completeUserSignup(name, email, phone, password, role) {
 
   if (typeof firebase !== 'undefined' && firebase.apps.length && firebase.auth) {
     firebase.auth().createUserWithEmailAndPassword(email, password)
-      .then(() => {
+      .then((userCredential) => {
+        userAccount.uid = userCredential.user.uid;
         completeLoginProcess(userAccount, role);
         saveUserAccountToFirebase(userAccount);
       })
@@ -246,17 +243,16 @@ function handleAuthLogin(e, role) {
       .then((userCredential) => {
         const fbUser = userCredential.user;
         const localAcc = findExistingAccount(email, null) || {
+          uid: fbUser.uid,
           name: fbUser.displayName || email.split('@')[0],
           email: fbUser.email,
-          role: 'user'
+          role: 'donor'
         };
         completeLoginProcess(localAcc, 'user');
       })
       .catch((err) => {
         if (err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
           showToast('❌ Invalid email or wrong password. Access denied.', 'error');
-        } else if (err.code === 'auth/user-not-found') {
-          handleLocalLoginFallback(email, password);
         } else {
           handleLocalLoginFallback(email, password);
         }
@@ -285,7 +281,7 @@ function completeLoginProcess(accountObj, role) {
   currentUserAccount = accountObj;
   localStorage.setItem('lifelink_current_user', JSON.stringify(accountObj));
 
-  if (role === 'admin') {
+  if (role === 'admin' || accountObj.role === 'admin') {
     isAdminLoggedIn = true;
     localStorage.setItem('lifelink_admin_logged_in', 'true');
   }
@@ -298,7 +294,7 @@ function completeLoginProcess(accountObj, role) {
   saveUserLoginToFirebase({
     name: accountObj.name,
     email: accountObj.email,
-    role: role || 'user',
+    role: role || accountObj.role || 'user',
     timestamp: new Date().toISOString()
   });
 }
@@ -310,10 +306,12 @@ function handleGoogleAuth() {
       .then((result) => {
         const user = result.user;
         const googleAccount = {
+          uid: user.uid,
           name: user.displayName || 'Google User',
           email: user.email,
-          role: 'user',
+          role: 'donor',
           photoURL: user.photoURL,
+          provider: 'google',
           signedUpAt: new Date().toISOString()
         };
 

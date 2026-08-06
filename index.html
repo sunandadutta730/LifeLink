@@ -13,7 +13,7 @@
     content="Connecting donors and saving lives. Find blood donors, register as a donor, or submit emergency requests.">
   <meta property="og:type" content="website">
   <title>LifeLink – Smart Blood Donor Network</title>
-  <link rel="stylesheet" href="css/style.css?v=6">
+  <link rel="stylesheet" href="css/style.css?v=7">
   <link rel="icon"
     href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23dc2626'><path d='M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z'/></svg>">
 </head>
@@ -51,7 +51,6 @@
           Login
         </button>
       </div>
-      <button class="theme-toggle-btn" id="theme-toggle-btn" onclick="toggleTheme()" title="Toggle Dark/Light Mode" aria-label="Toggle Dark/Light Mode">🌙</button>
       <button class="mobile-toggle" id="mobile-toggle" onclick="toggleMobileMenu()" aria-label="Toggle navigation menu">
         <span></span>
         <span></span>
@@ -209,6 +208,10 @@
     </div>
   </footer>
 
+  <!-- Floating Utility Buttons -->
+  <button class="notification-bell-btn" onclick="openNotificationCenterModal()" title="Real-Time Notifications" style="position: fixed; bottom: 24px; right: 80px; z-index: 1005; width: 44px; height: 44px; border-radius: 50%; background: var(--bg-secondary); border: 1.5px solid var(--border-color); color: var(--text-primary); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; box-shadow: var(--shadow-md);">🔔</button>
+  <button class="theme-toggle-btn" id="theme-toggle-btn" onclick="toggleTheme()" title="Toggle Dark/Light Mode" aria-label="Toggle Dark/Light Mode">🌙</button>
+
   <!-- Firebase 10.8.0 SDK (App, Firestore, Auth) -->
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
@@ -218,21 +221,20 @@
   <script src="config/constants.js"></script>
   <script src="config/firebase-config.js"></script>
 
-  <!-- Sample & Mock Data -->
-  <script src="data/sample-data/donors.js"></script>
-
   <!-- Application Modules -->
   <script src="js/utils.js?v=3"></script>
   <script src="js/validation.js"></script>
   <script src="js/notification.js"></script>
   <script src="js/map.js"></script>
   <script src="js/firebase.js"></script>
+  <script src="js/bank-auth.js?v=1"></script>
+  <script src="js/bank-portal.js?v=2"></script>
   <script src="js/ui.js?v=3"></script>
   <script src="js/auth.js"></script>
   <script src="js/donor.js"></script>
   <script src="js/receiver.js"></script>
   <script src="js/hospital.js"></script>
-  <script src="js/admin.js"></script>
+  <script src="js/admin.js?v=2"></script>
 
   <!-- Core Application Entry Point -->
   <script src="js/app.js?v=3"></script>

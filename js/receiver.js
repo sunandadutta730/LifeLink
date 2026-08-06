@@ -1,12 +1,6 @@
 /* ===== LifeLink Emergency Requests & Receiver Module ===== */
 
-let emergencyRequestsList = [
-  { id: 'REQ-001', patient: 'Rajesh Sharma', blood: 'O+', hospital: 'Lilavati Hospital', city: 'Mumbai', phone: '+91 98200 12345', units: 2, urgency: 'critical', status: 'Pending', createdAt: new Date().toISOString() },
-  { id: 'REQ-002', patient: 'Sunita Patel', blood: 'AB-', hospital: 'Max Super Speciality', city: 'Delhi', phone: '+91 98111 54321', units: 1, urgency: 'critical', status: 'In Progress', createdAt: new Date().toISOString() },
-  { id: 'REQ-003', patient: 'Vikram Malhotra', blood: 'B+', hospital: 'Manipal Hospital', city: 'Bangalore', phone: '+91 98450 99887', units: 3, urgency: 'urgent', status: 'Resolved', createdAt: new Date().toISOString() }
-];
-
-function handleEmergencyRequest(e) {
+async function handleEmergencyRequest(e) {
   e.preventDefault();
   const patient = document.getElementById('emg-patient').value.trim();
   const blood = document.getElementById('emg-blood').value;
@@ -23,30 +17,158 @@ function handleEmergencyRequest(e) {
   const selectedUrgencyBtn = document.querySelector('.urgency-option.selected');
   const urgency = selectedUrgencyBtn ? selectedUrgencyBtn.dataset.urgency : 'critical';
 
+  const reqId = `REQ-${Date.now().toString().slice(-4)}`;
+  const NOW = new Date().toISOString();
   const newReq = {
-    id: `REQ-${String(emergencyRequestsList.length + 1).padStart(3, '0')}`,
+    id: reqId,
     patient,
+    patientName: patient,
     blood,
+    bloodGroup: blood,
     hospital,
+    hospitalName: hospital,
     city,
     phone,
+    contactPhone: phone,
     units,
     urgency,
-    status: 'Pending',
-    createdAt: new Date().toISOString()
+    status: 'PENDING',
+    acceptedBy: null,
+    dispatchStatus: 'NOT_DISPATCHED',
+    patientConfirmed: false,
+    bankConfirmed: false,
+    progressTimeline: [
+      { step: 'Request Submitted', time: NOW },
+      { step: 'Broadcast Sent to Registered Blood Banks', time: NOW }
+    ],
+    createdAt: NOW
   };
 
-  emergencyRequestsList.unshift(newReq);
+  // Sync strictly to bloodRequests table in Firestore
+  if (typeof db !== 'undefined' && db) {
+    try {
+      await db.collection('bloodRequests').doc(reqId).set(newReq);
+      console.log('✅ Emergency request saved to bloodRequests collection:', reqId);
 
-  // Sync strictly to emergency table in Firestore
-  if (typeof firebase !== 'undefined' && firebase.apps.length && db) {
-    db.collection('emergency').doc(newReq.id).set(newReq)
-      .then(() => console.log('✅ Emergency request saved to emergency table:', newReq.id))
-      .catch(err => console.error('❌ emergency table error:', err));
+      // Send Broadcast notification to notifications collection
+      await db.collection('notifications').add({
+        targetRole: 'bank',
+        title: `🚨 Emergency Request: ${blood} (${units} Units)`,
+        message: `Urgent request for patient ${patient} at ${hospital}, ${city}. Phone: ${phone}`,
+        type: 'EMERGENCY',
+        timestamp: NOW,
+        read: false,
+        requestId: reqId
+      });
+    } catch (err) {
+      console.error('❌ bloodRequests table error:', err);
+    }
   }
 
-  showToast('🚨 Emergency request broadcasted across LifeLink network!', 'success');
+  showToast('🚨 Emergency request broadcasted across all Blood Banks!', 'success');
   navigateTo('emergency');
+}
+
+async function confirmPatientReceipt(reqId) {
+  const req = emergencyRequestsList.find(r => r.id === reqId);
+  if (!req) return;
+
+  const NOW = new Date().toISOString();
+  req.patientConfirmed = true;
+  req.progressTimeline = req.progressTimeline || [];
+  req.progressTimeline.push({ step: 'Patient / Hospital Confirmed Receipt', time: NOW });
+
+  if (req.bankConfirmed) {
+    req.status = 'COMPLETED';
+    req.progressTimeline.push({ step: 'Double Confirmed & Completed', time: NOW });
+    showToast(`🎉 Request #${reqId} FULLY COMPLETED via Double Confirmation!`, 'success');
+  } else {
+    req.status = 'AWAITING_FINAL_CONFIRMATION';
+    showToast(`✔️ Patient confirmed receipt! Awaiting final Blood Bank confirmation.`, 'info');
+  }
+
+  if (typeof db !== 'undefined' && db) {
+    try {
+      await db.collection('bloodRequests').doc(reqId).update(req);
+    } catch (err) {
+      console.error('Update error:', err);
+    }
+  }
+
+  renderPage();
+}
+
+async function handleMoneyDonation(e) {
+  e.preventDefault();
+  const donorName = document.getElementById('mny-name').value.trim();
+  const amount = parseFloat(document.getElementById('mny-amount').value) || 0;
+  const purpose = document.getElementById('mny-purpose').value;
+
+  if (amount <= 0) {
+    showToast('⚠️ Please enter a valid donation amount.', 'error');
+    return;
+  }
+
+  const donationData = {
+    id: `MNY-${Date.now().toString().slice(-4)}`,
+    donorName: donorName || 'Anonymous Hero',
+    amount,
+    purpose,
+    transactionId: `TXN-${Math.floor(1000000 + Math.random() * 9000000)}`,
+    timestamp: new Date().toISOString()
+  };
+
+  if (typeof saveMoneyDonationToFirebase === 'function') {
+    saveMoneyDonationToFirebase(donationData);
+  }
+
+  closeModal();
+  showToast(`❤️ Thank you ${donationData.donorName}! Your financial contribution of ₹${amount} was received!`, 'success');
+  if (typeof renderPage === 'function') renderPage();
+}
+
+function openMoneyDonationModal() {
+  closeModal();
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay active';
+  overlay.innerHTML = `
+    <div class="modal" style="max-width: 460px; padding: 32px; border-radius: var(--radius-xl);">
+      <div style="text-align: center; margin-bottom: 20px;">
+        <div style="width: 56px; height: 56px; background: linear-gradient(135deg, #10b981, #059669); border-radius: var(--radius-md); display: inline-flex; align-items: center; justify-content: center; color: #fff; margin-bottom: 12px; font-size: 1.8rem; box-shadow: 0 4px 14px rgba(16,185,129,0.35);">
+          💳
+        </div>
+        <h3 style="font-size: 1.45rem; font-weight: 800; margin: 0 0 4px; color: var(--text-primary);">Support LifeLink Mission</h3>
+        <p style="font-size: 0.88rem; color: var(--text-secondary); margin: 0;">Fund cold-chain storage, mobile camps, and emergency logistics.</p>
+      </div>
+
+      <form onsubmit="handleMoneyDonation(event)">
+        <div class="form-group" style="margin-bottom: 12px;">
+          <label>Your Name (Optional)</label>
+          <input type="text" class="form-control" id="mny-name" placeholder="e.g. Ananya Sharma">
+        </div>
+        <div class="form-group" style="margin-bottom: 12px;">
+          <label>Contribution Amount (₹) <span class="required">*</span></label>
+          <input type="number" class="form-control" id="mny-amount" min="100" value="1000" required>
+        </div>
+        <div class="form-group" style="margin-bottom: 20px;">
+          <label>Support Purpose</label>
+          <select class="form-control" id="mny-purpose">
+            <option value="Emergency Logistics">Emergency Logistics & Transport</option>
+            <option value="Mobile Camp Support">Mobile Blood Camp Support</option>
+            <option value="Cold Chain Storage">Cold-Chain Storage Equipment</option>
+            <option value="General Support" selected>General Healthcare Fund</option>
+          </select>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-lg glow-card" style="width: 100%; font-weight: 700; background: linear-gradient(135deg, #10b981, #059669); border: none;">
+          ❤️ Complete Money Donation
+        </button>
+      </form>
+
+      <button class="btn btn-outline btn-sm" onclick="closeModal()" style="width: 100%; margin-top: 14px; border-color: var(--border-color);">Cancel</button>
+    </div>
+  `;
+  document.body.appendChild(overlay);
 }
 
 function getUrgencyClass(urgency) {
@@ -58,9 +180,14 @@ function getUrgencyClass(urgency) {
 function renderEmergency() {
   return `
     <div class="page-header" style="background: linear-gradient(180deg, #fef2f2 0%, #fff 100%);">
-      <div class="container">
-        <h1 style="color: var(--red-700);">${SVG_ICONS.siren(32, 'var(--red-600)')} Emergency Blood Dispatch</h1>
-        <p>Broadcast urgent blood requests directly to nearby active donors and regional blood banks.</p>
+      <div class="container" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+        <div>
+          <h1 style="color: var(--red-700);">${SVG_ICONS.siren(32, 'var(--red-600)')} Emergency Blood Dispatch</h1>
+          <p style="margin: 0;">Broadcast urgent blood requests directly to nearby active donors and regional blood banks.</p>
+        </div>
+        <button class="btn btn-primary glow-card" onclick="openMoneyDonationModal()" style="background: linear-gradient(135deg, #10b981, #059669); border: none; font-weight: 700;">
+          💳 Donate Money / Financial Aid
+        </button>
       </div>
     </div>
 
@@ -134,31 +261,60 @@ function renderEmergency() {
             </form>
           </div>
 
-          <!-- Active Requests Sidebar -->
+          <!-- Active Requests Sidebar & Financial Aid Summary -->
           <div>
             <h3 style="font-size: 1.2rem; font-weight: 800; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
               ${SVG_ICONS.activity(20, 'var(--red-600)')} Live Emergency Feed
             </h3>
-            <div style="display: flex; flex-direction: column; gap: 14px;">
+            <div style="display: flex; flex-direction: column; gap: 14px; margin-bottom: 24px;">
               ${emergencyRequestsList.map(r => `
                 <div class="card glow-card" style="padding: 18px; border-left: 4px solid ${r.urgency === 'critical' ? 'var(--critical)' : 'var(--warning)'};">
                   <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
                     <div>
-                      <strong style="font-size: 1.05rem; display: block;">${r.patient}</strong>
-                      <span style="font-size: 0.82rem; color: var(--text-secondary);">${r.hospital}, ${r.city}</span>
+                      <span class="badge badge-blue" style="font-size: 0.75rem;">${r.id}</span>
+                      <strong style="font-size: 1.05rem; display: block; margin-top: 2px;">${r.patient || r.patientName}</strong>
+                      <span style="font-size: 0.82rem; color: var(--text-secondary);">${r.hospital || r.hospitalName}, ${r.city}</span>
                     </div>
-                    <span class="blood-badge" style="font-size: 1rem;">${r.blood}</span>
+                    <span class="blood-badge" style="font-size: 1rem;">${r.blood || r.bloodGroup}</span>
                   </div>
-                  <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 12px; font-size: 0.82rem; color: var(--text-secondary);">
+
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin: 8px 0; font-size: 0.82rem;">
                     <span>Needed: <strong>${r.units} Units</strong></span>
-                    <span class="badge ${getUrgencyClass(r.urgency)}">${r.urgency.toUpperCase()}</span>
+                    <span class="badge ${r.status === 'COMPLETED' ? 'badge-green' : (r.status === 'ACCEPTED' ? 'badge-blue' : 'badge-amber')}">${r.status || 'PENDING'}</span>
                   </div>
-                  <a href="tel:${r.phone}" class="btn btn-outline btn-sm" style="width: 100%; margin-top: 12px; font-weight: 700;">
-                    ${SVG_ICONS.phone(14)} Respond to Request
-                  </a>
+
+                  ${r.acceptedBy ? `
+                    <div style="font-size: 0.78rem; background: var(--bg-muted); padding: 6px 8px; border-radius: var(--radius-sm); margin-bottom: 8px;">
+                      🏥 Accepted by: <strong>${r.acceptedBy.bankName}</strong>
+                    </div>
+                  ` : ''}
+
+                  ${r.status !== 'COMPLETED' ? `
+                    <button class="btn btn-outline btn-sm" style="width: 100%; font-weight: 700; border-color: #10b981; color: #10b981;" onclick="confirmPatientReceipt('${r.id}')">
+                      ✔️ Patient / Hospital Confirm Delivery
+                    </button>
+                  ` : `
+                    <div class="badge badge-green" style="width: 100%; text-align: center; padding: 6px;">
+                      ✅ DOUBLE CONFIRMED & CLOSED
+                    </div>
+                  `}
                 </div>
               `).join('')}
             </div>
+
+            <!-- Financial Aid Contributions Card -->
+            <div class="card" style="padding: 18px;">
+              <h4 style="font-size: 1.05rem; font-weight: 800; margin: 0 0 10px; color: var(--text-primary);">💳 Recent Money Contributions</h4>
+              <div style="display: flex; flex-direction: column; gap: 8px;">
+                ${typeof moneyDonationsList !== 'undefined' && moneyDonationsList.length > 0 ? moneyDonationsList.slice(0, 3).map(m => `
+                  <div style="display: flex; justify-content: space-between; font-size: 0.82rem; background: var(--bg-muted); padding: 8px 10px; border-radius: var(--radius-sm);">
+                    <span><strong>${m.donorName}</strong> (${m.purpose})</span>
+                    <strong style="color: #10b981;">+₹${m.amount}</strong>
+                  </div>
+                `).join('') : '<div style="font-size: 0.8rem; color: var(--text-muted);">No money donations recorded yet.</div>'}
+              </div>
+            </div>
+
           </div>
         </div>
       </div>

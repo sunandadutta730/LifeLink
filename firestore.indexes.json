@@ -1,0 +1,61 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "bloodRequests",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "bloodInventory",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "bloodGroup", "order": "ASCENDING" },
+        { "fieldPath": "availableUnits", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "notifications",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "targetRole", "order": "ASCENDING" },
+        { "fieldPath": "timestamp", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "dispatches",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "bankId", "order": "ASCENDING" },
+        { "fieldPath": "dispatchedAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "donations",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "donorId", "order": "ASCENDING" },
+        { "fieldPath": "donationDate", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "donors",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "city", "order": "ASCENDING" },
+        { "fieldPath": "available", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "bloodBanks",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "city", "order": "ASCENDING" },
+        { "fieldPath": "operational", "order": "ASCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}
